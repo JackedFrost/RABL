@@ -1,0 +1,18 @@
+[package]
+name = "rabl_client_neon"
+version = "0.1.0"
+authors = ["klinical <zach.n500@gmail.com>"]
+license = "MIT"
+build = "build.rs"
+edition = "2018"
+exclude = ["artifacts.json", "index.node"]
+
+[lib]
+name = "rabl_client_neon"
+crate-type = ["cdylib"]
+
+[build-dependencies]
+neon-build = "0.7.1"
+
+[dependencies]
+neon = "0.7.1"
