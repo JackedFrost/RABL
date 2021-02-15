@@ -1,5 +1,7 @@
 const { app, BrowserWindow, Menu} = require('electron')
 
+app.allowRendererProcessReuse = false
+
 function createWindow () {
   const win = new BrowserWindow({
     width: 600,
