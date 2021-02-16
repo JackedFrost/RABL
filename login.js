@@ -7,5 +7,6 @@ loginButton.addEventListener('click', () => {
     let win = new BrowserWindow({ nodeInegration: true,enableRemoteModule: true,contextIsolation: true,width: 1920, height: 1080, minHeight:720, minWidth:1280 })
     win.on('close', function () { win = null })
     win.loadURL(modalPath)
+    win.openDevTools()
     win.show()
   })

@@ -33,7 +33,3 @@ app.on('activate', () => {
     createWindow()
   }
 })
-const {ipcMain} = require('electron')
-ipcMain.on('resize-me-please', (event, arg) => {
-  win.setSize(width,height)
-})

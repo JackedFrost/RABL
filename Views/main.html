@@ -161,24 +161,29 @@
           <div class="flex-1 flex justify-between">
           <div class="bg-gray-750 flex-1 flex flex-col justify-between">
             <div class="text-sm text-gray-400 overflow-y-auto">
-              <!--Message Template-->
-              <div class="flex mx-5 my-3 py-4 border-5 border-gray-700">
-                <div class="flex-none">
-                  <a href="#"><img src="../placeholder/images/treti.png" alt="Treti" class="w-10 h-10 rounded-xl"></a>
-                </div>
-                <div class="ml-5">
-                  <div>
-                    <a href="#" class="text-white hover:underline">Treti</a>
-                    <span class="text-xs text-gray-600 ml-1">Today at 12:34 AM</span>
+              <ul id="messageList">
+                <li id="message">
+                  <div class="flex mx-5 my-3 py-4 border-5 border-gray-700">
+                    <div class="flex-none">
+                      <a href="#"><img src="../placeholder/images/treti.png" alt="Treti" class="w-10 h-10 rounded-xl"></a>
+                    </div>
+                    <div class="ml-5">
+                      <div>
+                        <a href="#" class="text-white hover:underline">Treti</a>
+                        <span class="text-xs text-gray-600 ml-1">Today at 12:34 AM</span>
+                      </div>
+                      <div>
+                      <div>This is ugly</div>
+                      <div>uhhhhh</div>
+                      <div>Why did we leave discord again...?</div>
+                    </div>
                   </div>
-                  <div>
-                  <div>This is ugly</div>
-                  <div>uhhhhh</div>
-                  <div>Why did we leave discord again...?</div>
                 </div>
               </div>
-            </div>
-          </div>
+                </li>
+              </ul>
+              <!--Message Template-->
+              
             <!--End Message-->
           <!-- Chat Bar-->
           <!--Attachments-->
@@ -190,7 +195,7 @@
             </button>
             <!--Text Area-->
             <div class="flex-1">
-              <input type="text" class="w-full text-sm h-10 px-2 py-2 bg-gray-700 text-gray-200 focus:outline-none">
+              <input type="text" class="w-full text-sm h-10 px-2 py-2 bg-gray-700 text-gray-200 focus:outline-none" id="messageInput" placeholder="Message...">
             </div>
             <!--Gif Drawer-->
             <button class="px-2 py-2 h-10 bg-gray-700 rounded-l text-gray-500 hover:text-white border-l border-gray-600">
@@ -224,4 +229,5 @@
         </div> 
       </div>
 </body>
+<script src="../Scripts/Message.js"></script>
 </html>
