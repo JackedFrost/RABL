@@ -10,7 +10,7 @@ function createWindow () {
       nodeIntegration: true,
       enableRemoteModule: true
     },
-    frame: true, transparent: true, alwaysOnTop: true
+    frame: true, transparent: true, alwaysOnTop: false, backgroundColor:'#1F2937'
   })
   var menu= null
   Menu.setApplicationMenu(menu)

@@ -34,7 +34,11 @@ function update() {
     return messageInput;
 }
 function sendMessage() {
-    var messageInput = document.forms['MessageForm']['messageInput'].value
+    var messageInput = document.forms['MessageForm']['messageInput'].value;
+    if (messageInput.charAt(0) =='/'){
+       messageInput = commands(messageInput)
+    }
+
     var messageTime = getMessageTime();
     var message = createMessage(messageInput, messageTime, userImage, userName);
     var messageSlot = document.createElement('li');
@@ -43,5 +47,39 @@ function sendMessage() {
     update();
     return false;
 }
+function commands (messageInput) {
+    let commandOut;
+    let duelVal = (Math.floor(Math.random() * 3));
+    switch (messageInput) {
+        case "\/uwu":
+            commandOut = "(◡ ω ◡)";
+            break;
+        case "\/d20":
+            commandOut = "You rolled: " + Math.floor((Math.random() * Math.floor(20)) + 1);
+            break;
+        case "\/disapprove":
+            commandOut = "(ಠ_ಠ)";
+            break;
+        case "\/tyler":
+            commandOut = "(づ￣ ³￣)づC====B";
+            break;
+        case "\/coin":
+            commandOut = Math.random() < .5 ? "You filpped: Heads!" : "You flipped: Tails!";
+            break;
+        case "\/duel":
+            commandOut = duelVal == 0 ? "Rock!" : duelVal == 1 ? "Paper!" : "Scissors!";
+            break;
+        case "\/cheat":
+            commandOut = "↑ ↑ ↓ ↓ ← → ← → B A ";
+            break;
+        default:
+            commandOut = "Invalid command.";
+            break;
+    }
+    return commandOut;
+}
+
+
+
 
 
