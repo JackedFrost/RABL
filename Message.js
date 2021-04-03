@@ -1,4 +1,5 @@
-//var sqlite3 = require("sqlite3");
+var sqlite3 = require("sqlite3/sqlite3");
+
 
 var userImage = "../placeholder/images/treti.png";
 var userName = "Treti";
@@ -9,7 +10,7 @@ var chatLog = new sqlite3.Database('logs');
 function createMessage(messageInput, messageTime, userImage, userName) {
     var html= `<div class="flex mx-5 my-3 py-4 border-5 border-gray-700"><div class="flex-none">
             <a href="#"><img src=" ${userImage}"alt=" ${userName}_img" class="w-10 h-10 rounded-xl"></img></a>
-            </div><div class="ml-5"><div>
+            </div><div class="ml-5"><div>S
             <a href="#" class="text-white hover:underline">${userName}</a>
             <span class="text-xs text-gray-600 ml-1">${messageTime} </span></div>
             <div><div>${messageInput} </div></div></div></div></div>`;
@@ -40,7 +41,7 @@ function sendMessage() {
     if (messageInput.charAt(0) =='/'){
        messageInput = commands(messageInput)
     }
-
+    addon.sendToServer(messageInput);
     var messageTime = getMessageTime();
     var message = createMessage(messageInput, messageTime, userImage, userName);
     var messageSlot = document.createElement('li');
@@ -80,14 +81,9 @@ function commands (messageInput) {
     }
     return commandOut;
 }
-function sendToServer(message){
-    var msg = `msg.treti.${message}`
-    
-}
-function recieveFromServer(){
-    // lol he thinks i am actually gonna code!?!
-}
-/*function createLogs(){
+
+
+function createLogs(){
     chatLog.serialize(function(){
         chatLog.run("CREATE TABLE logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR, userImage VARCHAR)");
     });
@@ -103,7 +99,7 @@ function getSavedMessages(){
     });
     chatlog.close();
 }
-*/
+
 
 
 
