@@ -17,15 +17,9 @@ fn login(mut cx: FunctionContext) -> JsResult<JsBoolean> {
     let login_payload = login_builder.as_bytes();
     println!("Connecting to Rabl Server...");
 
-    match stream.write(login_payload) {
-        Ok(e) => {
-            return Ok(cx.boolean(true))
-        }
-        Err(e) => {
-            println!("ERROR E");
-            return Ok(cx.boolean(false))
-        }
-    };
+    if let Err(err) = stream.write(login_payload) {
+        panic!(&err.to_string());
+    }
     println!("Sent login request...");
 
     // 16 byte buffer pre-allocation, response should not exceed 16 bytes
@@ -37,12 +31,6 @@ fn login(mut cx: FunctionContext) -> JsResult<JsBoolean> {
     println!("Response received...{} ", response);
 
     if response == "login.grant" {
-        //match login_cache(usr) {
-        //    Ok(_) => println!("Wrote user cache"),
-        //    Err(_) => println!("Failed to write user cache"),
-        //}
-
-        // Regardless if the cache wrote or not, we were still able to login.
         println!("Login successful!");
         Ok(cx.boolean(true))
     } else {
@@ -117,27 +105,20 @@ fn poll_messages(mut cx:FunctionContext) -> JsResult<JsObject> {
                     cursor = i+1;
                 }
             }
+
+            let mut msg_str = String::new();
+            for message in message_vec {
+                msg_str.push_str(from_utf8(&message).expect(""));
+            }
+
+            let jmsg_str = cx.string(msg_str);
+            
+            let jmsg_object = JsObject::new(&mut cx);
+            jmsg_object.set(&mut cx, "message", jmsg_str).unwrap();
+
+            return Ok(jmsg_object);
+
         }, 
         Err(e) => panic!(&e.to_string())
     }
-
-//////////////////////////////////////////////////////////////////////
-
-    let jmsg_object = JsObject::new(&mut cx);
-    let jstr_sender = cx.string("omai");
-    let jstr_target = cx.string("wa");
-    let jstr_content = cx.string("mo");
-    let jmsg_queue = JsObject::new(&mut cx);
-
-    jmsg_object.set(&mut cx, "sender", jstr_sender).unwrap();
-    jmsg_object.set(&mut cx, "target", jstr_target).unwrap();
-    jmsg_object.set(&mut cx, "content", jstr_content).unwrap();
-
-    let x = vec![jmsg_object];
-    let jq_array = JsArray::new(&mut cx, x.len() as u32);
-    for (i, obj) in x.iter().enumerate() {
-        jq_array.set(&mut cx, i as u32, obj.to_owned())?;
-    }
-
-    Ok(jmsg_object)
 }
