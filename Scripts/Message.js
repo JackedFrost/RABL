@@ -1,8 +1,10 @@
-"use strict";
+//var sqlite3 = require("sqlite3");
+
 var userImage = "../placeholder/images/treti.png";
 var userName = "Treti";
 var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
+var chatLog = new sqlite3.Database('logs');
 
 function createMessage(messageInput, messageTime, userImage, userName) {
     var html= `<div class="flex mx-5 my-3 py-4 border-5 border-gray-700"><div class="flex-none">
@@ -64,7 +66,7 @@ function commands (messageInput) {
             commandOut = "(づ￣ ³￣)づC====B";
             break;
         case "\/coin":
-            commandOut = Math.random() < .5 ? "You filpped: Heads!" : "You flipped: Tails!";
+            commandOut = Math.random() < .5 ? "You flipped: Heads!" : "You flipped: Tails!";
             break;
         case "\/duel":
             commandOut = duelVal == 0 ? "Rock!" : duelVal == 1 ? "Paper!" : "Scissors!";
@@ -78,6 +80,30 @@ function commands (messageInput) {
     }
     return commandOut;
 }
+function sendToServer(message){
+    var msg = `msg.treti.${message}`
+    
+}
+function recieveFromServer(){
+    // lol he thinks i am actually gonna code!?!
+}
+/*function createLogs(){
+    chatLog.serialize(function(){
+        chatLog.run("CREATE TABLE logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR, userImage VARCHAR)");
+    });
+}
+function saveMessage(messageInput, messageTime, userImage, userName){
+    var statement = chatLog.prepare("INSERT INTO logs VALUES (?,?,?,?,?)");
+    statement.run(messageID, userName, messageInput, messageTime, userImage);
+    statement.finalize();
+}
+function getSavedMessages(){
+    chatlog.each("SELECT username, messageTime, userImage, message from logs", function(err,row){
+        createMessage(row.message, row.messageTime, row.userImage, row.userName);
+    });
+    chatlog.close();
+}
+*/
 
 
 
