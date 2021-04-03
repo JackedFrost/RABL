@@ -1,11 +1,8 @@
-var sqlite3 = require("sqlite3/sqlite3");
-
-
 var userImage = "../placeholder/images/treti.png";
 var userName = "Treti";
 var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
-var chatLog = new sqlite3.Database('logs');
+//var chatLog = new sqlite3.Database('logs');
 
 function createMessage(messageInput, messageTime, userImage, userName) {
     var html= `<div class="flex mx-5 my-3 py-4 border-5 border-gray-700"><div class="flex-none">
@@ -41,7 +38,7 @@ function sendMessage() {
     if (messageInput.charAt(0) =='/'){
        messageInput = commands(messageInput)
     }
-    addon.sendToServer(messageInput);
+    sendToServer(messageInput, userName);
     var messageTime = getMessageTime();
     var message = createMessage(messageInput, messageTime, userImage, userName);
     var messageSlot = document.createElement('li');
@@ -81,9 +78,14 @@ function commands (messageInput) {
     }
     return commandOut;
 }
+function sendToServer(messageInput, userName){
+    var sender = userName;
+    var reciever = "targetName";
+    addon.send_message(sender,reciever,messageInput);
+}
 
 
-function createLogs(){
+/*function createLogs(){
     chatLog.serialize(function(){
         chatLog.run("CREATE TABLE logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR, userImage VARCHAR)");
     });
@@ -99,6 +101,7 @@ function getSavedMessages(){
     });
     chatlog.close();
 }
+*/
 
 
 

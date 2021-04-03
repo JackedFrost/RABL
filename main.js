@@ -4,8 +4,8 @@ app.allowRendererProcessReuse = false
 
 function createWindow () {
   const win = new BrowserWindow({
-    width: 600,
-    height: 800,
+    width: 1920,
+    height: 1080,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true
@@ -31,5 +31,14 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow()
+  }
+})
+app.once('ready-to-show', () => {
+  if (addon.login(username, password)) {
+    console.log("ok")
+    win.show()
+  } else {
+    console.log("no")
+    win.show()
   }
 })
