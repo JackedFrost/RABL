@@ -38,7 +38,7 @@ function sendMessage() {
     if (messageInput.charAt(0) =='/'){
        messageInput = commands(messageInput)
     }
-    sendToServer(messageInput, userName);
+    rabl_rust.send_message("sender", "target", messageInput);
     var messageTime = getMessageTime();
     var message = createMessage(messageInput, messageTime, userImage, userName);
     var messageSlot = document.createElement('li');

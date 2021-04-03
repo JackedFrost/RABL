@@ -46,14 +46,14 @@ fn login(mut cx: FunctionContext) -> JsResult<JsBoolean> {
 }
 
 fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-    // First determine arguments
+    // Gathering parameters from JavaScript
     let sender = cx.argument::<JsString>(0)?.value();
     let target = cx.argument::<JsString>(1)?.value();
     let message = cx.argument::<JsString>(2)?.value();
     let payload = build_payload(vec!["msg".to_string(), sender, target, message]);
 
     // Arguments good - begin connection
-    // panic! is going throw our errors up to be handled by the JavaScript
+    // panic! is going to propogate our errors up to be handled by the JavaScript
     let mut stream = establish_connection();
     if let Err(stream_write_error) = stream.write(&payload) {
         panic!(&stream_write_error.to_string());
