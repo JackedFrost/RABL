@@ -43,6 +43,7 @@ function sendMessage() {
 
     var messageTime = getMessageTime();
     var message = createMessage(messageInput, messageTime, userImage, userName);
+
     var messageSlot = document.createElement('li');
     messageSlot.innerHTML = message;
     messageList.appendChild(messageSlot);
@@ -80,13 +81,15 @@ function commands (messageInput) {
     }
     return commandOut;
 }
-function sendToServer(message){
-    var msg = `msg.treti.${message}`
-    
+function sendToServer(messageInput){
+    var sender = username;
+    var reciever = targetName;
+    addon.send_Message(sender,reciever,messageInput);
 }
 function recieveFromServer(){
     // lol he thinks i am actually gonna code!?!
 }
+
 /*function createLogs(){
     chatLog.serialize(function(){
         chatLog.run("CREATE TABLE logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR, userImage VARCHAR)");
