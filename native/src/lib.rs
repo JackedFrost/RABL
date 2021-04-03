@@ -58,6 +58,7 @@ fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 register_module!(mut cx, {
     cx.export_function("login", login)?;
     cx.export_function("send_message", send_message)?;
+    cx.export_function("poll_messages", poll_messages)?;
     Ok(())
 });
 
