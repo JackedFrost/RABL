@@ -1,5 +1,7 @@
 use neon::prelude::*;
+use core::panic;
 use std::{
+    error::Error,
     str::from_utf8,
     net::TcpStream, 
     io::{Read, Write}
@@ -9,7 +11,7 @@ fn login(mut cx: FunctionContext) -> JsResult<JsBoolean> {
     let username = cx.argument::<JsString>(0)?.value();
     let password = cx.argument::<JsString>(1)?.value();
     
-    let mut stream = TcpStream::connect("64.227.87.184:5050").unwrap();
+    let mut stream = establish_connection();
     // We are creating a String, by using .join() on an array of &str, seperated by ".", we then want this message in the form of a 'byte slice'
     let login_builder = ["login", &username, &password].join(".");
     let login_payload = login_builder.as_bytes();
@@ -48,6 +50,94 @@ fn login(mut cx: FunctionContext) -> JsResult<JsBoolean> {
     }
 }
 
+fn send_message(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+    // First determine arguments
+    let sender = cx.argument::<JsString>(0)?.value();
+    let target = cx.argument::<JsString>(1)?.value();
+    let message = cx.argument::<JsString>(2)?.value();
+
+    // Arguments good - begin connection
+    // panic! is going throw our errors up to be handled by the JavaScript
+    let mut stream = establish_connection();
+    let payload = ["msg.", &sender, ".", &target, ".", &message].concat();
+    if let Err(stream_write_error) = stream.write(payload.as_bytes()) {
+        panic!(&stream_write_error.to_string());
+    }
+
+    Ok(cx.undefined())
+}
+
 register_module!(mut cx, {
-    cx.export_function("login", login)
+    cx.export_function("login", login)?;
+    cx.export_function("send_message", send_message)?;
+    Ok(())
 });
+
+struct Message {
+    sender: String,
+    target: String,
+    content: String,
+}
+
+struct MessageQueue {
+    messages: Vec<Message>,
+}
+
+// Internal lib function to establish a connection
+fn establish_connection() -> TcpStream {
+    match TcpStream::connect("64.227.87.184:5050") {
+        Ok(stream) => {
+            stream
+        },
+        Err(e) => panic!(&e.to_string())
+    }
+}
+
+fn poll_messages(mut cx:FunctionContext) -> JsResult<JsObject> {
+    let user = cx.argument::<JsString>(0)?.value();
+    let mut stream = establish_connection();
+
+    let payload = ["poll.", &user].concat();
+
+    if let Err(e) = stream.write(payload.as_bytes()) {
+        panic!(&e.to_string())
+    }
+
+    let mut buffer = vec![];
+    
+    match stream.read(&mut buffer) {
+        Ok(_) => {
+            println!("{:?}", buffer);
+            let mut message_vec = vec![];
+            let mut cursor = 0;
+            for (i, b) in buffer.iter().enumerate() {
+                if b == &31 {
+                    let message = buffer[cursor..=i].to_owned();
+                    message_vec.push(message);
+                    cursor = i+1;
+                }
+            }
+        }, 
+        Err(e) => panic!(&e.to_string())
+    }
+
+//////////////////////////////////////////////////////////////////////
+
+    let jmsg_object = JsObject::new(&mut cx);
+    let jstr_sender = cx.string("omai");
+    let jstr_target = cx.string("wa");
+    let jstr_content = cx.string("mo");
+    let jmsg_queue = JsObject::new(&mut cx);
+
+    jmsg_object.set(&mut cx, "sender", jstr_sender).unwrap();
+    jmsg_object.set(&mut cx, "target", jstr_target).unwrap();
+    jmsg_object.set(&mut cx, "content", jstr_content).unwrap();
+
+    let x = vec![jmsg_object];
+    let jq_array = JsArray::new(&mut cx, x.len() as u32);
+    for (i, obj) in x.iter().enumerate() {
+        jq_array.set(&mut cx, i as u32, obj.to_owned())?;
+    }
+
+    Ok(jmsg_object)
+}
