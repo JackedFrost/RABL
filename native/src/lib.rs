@@ -10,13 +10,15 @@ use std::{
 // Take in a series of Strings and build a server request using specific sep characters
 fn build_payload(components: Vec<String>) -> Vec<u8> {
     let mut payload: Vec<u8> = vec![];
-    for c in components {
-        let mut x = c.into_bytes();
+    for (i, c) in components.iter().enumerate() {
+        let mut x = c.clone().into_bytes();
         payload.append(&mut x);
-        payload.push(29);
+        if i == components.len() - 1 {
+            payload.push(31);
+        } else {
+            payload.push(29);
+        }
     }
-    payload.push(31);
-    
     payload
 }
 
