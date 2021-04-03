@@ -1,5 +1,4 @@
-"use strict";
-var sqlite3 = require("sqlite3").verbose;
+//var sqlite3 = require("sqlite3");
 
 var userImage = "../placeholder/images/treti.png";
 var userName = "Treti";
@@ -81,7 +80,14 @@ function commands (messageInput) {
     }
     return commandOut;
 }
-function createLogs(){
+function sendToServer(message){
+    var msg = `msg.treti.${message}`
+    
+}
+function recieveFromServer(){
+    // lol he thinks i am actually gonna code!?!
+}
+/*function createLogs(){
     chatLog.serialize(function(){
         chatLog.run("CREATE TABLE logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR, userImage VARCHAR)");
     });
@@ -97,6 +103,7 @@ function getSavedMessages(){
     });
     chatlog.close();
 }
+*/
 
 
 
