@@ -38,7 +38,8 @@ function sendMessage() {
     if (messageInput.charAt(0) =='/'){
        messageInput = commands(messageInput)
     }
-    rabl_rust.send_message("sender", "target", messageInput);
+    rabl_rust.send_message("test", "test", messageInput);
+    console.log(rabl_rust.poll_messages("test"));
     var messageTime = getMessageTime();
     var message = createMessage(messageInput, messageTime, userImage, userName);
     var messageSlot = document.createElement('li');

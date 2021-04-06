@@ -1,4 +1,3 @@
-var rabl_rust = require('../native');
 const loginButton = document.getElementById('loginButton')
 
 loginButton.addEventListener('click', () => {
