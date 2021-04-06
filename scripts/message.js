@@ -101,7 +101,7 @@ function getSavedMessages(){
     });
     chatlog.close();
 }
-/*
+*/
 
 
 
