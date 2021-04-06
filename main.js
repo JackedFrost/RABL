@@ -19,7 +19,6 @@ function createWindow () {
 
   win.loadFile('Views/login.html')
   win.openDevTools()
-
 }
 
 app.whenReady().then(createWindow)

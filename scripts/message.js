@@ -27,7 +27,7 @@ function getMessageTime() {
     var messageTime = `Today at ${tempTimeHours}:${tempTime.getMinutes()} ${AMPM}`;
     return messageTime;
 }
-function update() {
+function update(chatWindow) {
     var messageInput = document.forms['MessageForm']['messageInput'].value = "";
     //This line is supposed to automatically keep the page scrolling to the most recent message
     chatWindow.scrollTop = chatWindow.scrollHeight;
@@ -81,11 +81,11 @@ function commands (messageInput) {
 function sendToServer(messageInput, userName){
     var sender = userName;
     var reciever = "targetName";
-    addon.send_message(sender,reciever,messageInput);
+    rabl_rust.send_message(sender,reciever,messageInput);
 }
 
-
-/*function createLogs(){
+/*
+function createLogs(){
     chatLog.serialize(function(){
         chatLog.run("CREATE TABLE logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR, userImage VARCHAR)");
     });
@@ -101,7 +101,8 @@ function getSavedMessages(){
     });
     chatlog.close();
 }
-*/
+/*
+
 
 
 

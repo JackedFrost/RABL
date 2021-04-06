@@ -5,4 +5,6 @@ Saved Messages
 
 */
 //header bar label for current Friends DM
-document.getElementById('FriendHeaderLabel');
+var friendHeaderLabel = document.getElementById('FriendHeaderLabel');
+friendHeaderLabel.innerText() = User.friendName;
+
