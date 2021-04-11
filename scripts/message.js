@@ -38,8 +38,12 @@ function sendMessage() {
     if (messageInput.charAt(0) =='/'){
        messageInput = commands(messageInput)
     }
-    rabl_rust.send_message("test", "test", messageInput);
-    console.log(rabl_rust.poll_messages("test"));
+    try {
+        rabl_rust.send_message("test", "test", messageInput);
+        console.log(rabl_rust.poll_messages("test"));
+    } catch (send_message_error) {
+        console.log(send_message_error)
+    }
     var messageTime = getMessageTime();
     var message = createMessage(messageInput, messageTime, userImage, userName);
     var messageSlot = document.createElement('li');
@@ -78,11 +82,6 @@ function commands (messageInput) {
             break;
     }
     return commandOut;
-}
-function sendToServer(messageInput, userName){
-    var sender = userName;
-    var reciever = "targetName";
-    rabl_rust.send_message(sender,reciever,messageInput);
 }
 
 /*
