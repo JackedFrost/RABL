@@ -4,6 +4,41 @@ use neon::prelude::*;
 use core::panic;
 use std::{collections::HashMap, io::{Read, Write}, net::TcpStream, str::from_utf8};
 use std::{error::Error, fmt};
+
+fn handle_poll_friends(mut cx: FunctionContext) -> JsResult<JsArray> {
+  let username = cx.argument::<JsString>(0)?.value();
+
+  let friends_list = poll_friends(username).expect("TODO");
+  let JsFriendsList = JsArray::new(&mut cx, friends_list.len() as u32);
+  for (i, friend) in friends_list.iter().enumerate() {
+    let friend = cx.string(friend);
+    JsFriendsList.set(&mut cx, i as u32, friend)?;
+  }
+
+  Ok(JsFriendsList)
+}
+
+fn poll_friends(username: String) -> Result<Vec<String>, Box<dyn Error>> {
+  let mut stream = establish_connection()?;
+  let payload = build_payload(vec!["pollfriends".to_string(), username]);
+
+  stream.write(&payload)?;
+  let mut buffer = [0 as u8; 256];
+  let _data_len = stream.read(&mut buffer)?;
+
+  let mut friends_list: Vec<String> = Vec::new();
+  let mut cursor: usize = 0;
+  for (i, char) in buffer.iter().enumerate() {
+    if char == &31 || char == &23 {
+      let utf_str = from_utf8(&buffer[cursor..i])?;
+      friends_list.push(utf_str.to_owned());
+      cursor = i+1;
+    }
+  } 
+  
+  Ok(friends_list)
+}
+
 // Take in a series of Strings and build a server request using specific sep characters
 fn build_payload(components: Vec<String>) -> Vec<u8> {
     let mut payload: Vec<u8> = vec![];
@@ -82,6 +117,7 @@ register_module!(mut cx, {
     cx.export_function("login", login_clicked)?;
     cx.export_function("send_message", send_message_clicked)?;
     cx.export_function("poll_messages", poll_messages_clicked)?;
+    cx.export_function("poll_friends", handle_poll_friends)?;
     Ok(())
 });
 
@@ -238,5 +274,11 @@ mod tests {
     send_message("test".to_string(), "test".to_string(), "hello".to_string()).unwrap();
     let empty_messages = vec![Message {source:"test".to_string(),content:"hello".to_string()}];
     assert_eq!(poll_messages("test".to_string()).unwrap().expect("").get(0).expect(":w"), empty_messages.get(0).expect(""));
+  }
+
+  #[test]
+  fn test_friendslist() {
+    let debug_vec = vec!["asdf".to_string(), "asdf".to_string()];
+    assert_eq!(poll_friends("test".to_string()).unwrap(), debug_vec);
   }
 }
