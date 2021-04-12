@@ -8,6 +8,7 @@ json that holds all friends information
 
 function getFriends(){
   //get the friends list from Rust
+  
 }
 
 var html = `<li class="text-gray-500 px-2 hover:text-gray-200 hover:bg-gray-750 py-1 my-2">

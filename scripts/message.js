@@ -1,13 +1,24 @@
+
 var userImage = "../placeholder/images/treti.png";
-var userName = "Treti";
+var userName = "test";
 var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
-//var chatLog = new sqlite3.Database('logs');
+var file = "../database/chatLog.sqlite3"
+var sqlite3 = require('sqlite3').verbose();
+
+
+
+
+getMessages();
+
+setInterval(function(){
+    getMessages();
+},5000)
 
 function createMessage(messageInput, messageTime, userImage, userName) {
     var html= `<div class="flex mx-5 my-3 py-4 border-5 border-gray-700"><div class="flex-none">
             <a href="#"><img src=" ${userImage}"alt=" ${userName}_img" class="w-10 h-10 rounded-xl"></img></a>
-            </div><div class="ml-5"><div>S
+            </div><div class="ml-5"><div>
             <a href="#" class="text-white hover:underline">${userName}</a>
             <span class="text-xs text-gray-600 ml-1">${messageTime} </span></div>
             <div><div>${messageInput} </div></div></div></div></div>`;
@@ -30,10 +41,10 @@ function getMessageTime() {
 function update(chatWindow) {
     var messageInput = document.forms['MessageForm']['messageInput'].value = "";
     //This line is supposed to automatically keep the page scrolling to the most recent message
-    chatWindow.scrollTop = chatWindow.scrollHeight;
+    //chatWindow.scrollTop = chatWindow.scrollHeight;
     return messageInput;
 }
-function sendMessage() {
+function sendMessage(chatLog) {
     var messageInput = document.forms['MessageForm']['messageInput'].value;
     if (messageInput.charAt(0) =='/'){
        messageInput = commands(messageInput)
@@ -50,6 +61,7 @@ function sendMessage() {
     messageSlot.innerHTML = message;
     messageList.appendChild(messageSlot);
     update();
+    //saveMessage(chatLog,messageInput, messageTime, userName)
     return false;
 }
 function commands (messageInput) {
@@ -83,25 +95,44 @@ function commands (messageInput) {
     }
     return commandOut;
 }
-
+function getMessages(){
+    var recievedMessages = rabl_rust.poll_messages(userName)
+    for(message in recievedMessages){
+        var template = JSON.parse(message);
+        var recievedUser = template.source;
+        var recievedMessage = template.content;
+        var messageTime = getMessageTime();
+        createMessage(recievedMessage, messageTime, userImage, recievedUser);
+        /*if (recievedMessage != null){
+        saveMessage(recievedMessage, messageTime, recievedUser);
+        }*/
+    }
+    update();
+}
 /*
 function createLogs(){
+    let chatLog = new sqlite3.Database(file, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
     chatLog.serialize(function(){
-        chatLog.run("CREATE TABLE logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR, userImage VARCHAR)");
+        chatLog.run("CREATE TABLE logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR)");
     });
 }
-function saveMessage(messageInput, messageTime, userImage, userName){
-    var statement = chatLog.prepare("INSERT INTO logs VALUES (?,?,?,?,?)");
-    statement.run(messageID, userName, messageInput, messageTime, userImage);
+function saveMessage(chatLog,messageInput, messageTime, userName){
+    let chatLog = new sqlite3.Database(file, sqlite3.OPEN_READWRITE);
+    var Id = 1
+    var messageID = Id ++
+    var statement = chatLog.prepare("INSERT INTO logs VALUES (?,?,?,?)");
+    statement.run(messageID, userName, messageInput, messageTime);
     statement.finalize();
 }
 function getSavedMessages(){
-    chatlog.each("SELECT username, messageTime, userImage, message from logs", function(err,row){
-        createMessage(row.message, row.messageTime, row.userImage, row.userName);
+    chatlog.each("SELECT username, messageTime, message from logs", function(err,row){
+        createMessage(row.message, row.messageTime, row.userName);
     });
     chatlog.close();
 }
 */
+
+
 
 
 
