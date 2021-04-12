@@ -12,7 +12,7 @@ var sqlite3 = require('sqlite3').verbose();
 getMessages();
 
 setInterval(function(){
-    getMessages();
+    getMessages(userName);
 },5000)
 
 function createMessage(messageInput, messageTime, userImage, userName) {
@@ -51,7 +51,7 @@ function sendMessage(chatLog) {
     }
     try {
         rabl_rust.send_message("test", "test", messageInput);
-        console.log(rabl_rust.poll_messages("test"));
+        //console.log(rabl_rust.poll_messages("test"));
     } catch (send_message_error) {
         console.log(send_message_error)
     }
@@ -97,17 +97,21 @@ function commands (messageInput) {
 }
 function getMessages(){
     var recievedMessages = rabl_rust.poll_messages(userName)
-    for(message in recievedMessages){
-        var template = JSON.parse(message);
-        var recievedUser = template.source;
-        var recievedMessage = template.content;
+    console.log(recievedMessages);
+    
+    for(i = 0; i <recievedMessages.length; i++){
+        let content = recievedMessages[i].Content
+        let source = recievedMessages[i].Source
         var messageTime = getMessageTime();
-        createMessage(recievedMessage, messageTime, userImage, recievedUser);
+        var userImage = "../placeholder/images/treti.png"
+        message = createMessage(content, messageTime, userImage, source);
+        var messageSlot = document.createElement('li');
+        messageSlot.innerHTML = message;
+        messageList.appendChild(messageSlot);
         /*if (recievedMessage != null){
         saveMessage(recievedMessage, messageTime, recievedUser);
         }*/
     }
-    update();
 }
 /*
 function createLogs(){
