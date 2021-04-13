@@ -4,14 +4,54 @@ use neon::prelude::*;
 
 mod client_core;
 use crate::client_core::*;
+use serde::{Serialize, Deserialize};
 
 register_module!(mut cx, {
     cx.export_function("login", login_clicked)?;
     cx.export_function("send_message", send_message_clicked)?;
     cx.export_function("poll_messages", poll_messages_clicked)?;
     cx.export_function("poll_friends", handle_poll_friends)?;
+    cx.export_function("serialize_login", serialize_login)?;
+    cx.export_function("deserialize_login", deserialize_login)?;
     Ok(())
 });
+
+#[derive(Serialize, Deserialize)]
+struct User {
+  username: String,
+  password: String
+  //last_login: Time,
+}
+
+fn serialize_login(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+  let username = cx.argument::<JsString>(0)?.value();
+  let password = cx.argument::<JsString>(1)?.value();
+
+  let user = User { username, password }; 
+  let file = get_file("userdat.cbor").unwrap();
+
+  match serde_cbor::to_writer(file, &user) {
+    Ok(_) => println!("User login cached. TODO: Allow a user to disable this"),
+    Err(e) => eprintln!("Error writing serialized user data to file {:?}", e)
+  }
+
+  Ok(cx.undefined())
+}
+
+
+fn deserialize_login(mut cx: FunctionContext) -> JsResult<JsObject> {
+  let file = get_file("userdat.cbor").unwrap();
+  let userdat: User = serde_cbor::from_reader(file).unwrap();
+
+  let JsUser = JsObject::new(&mut cx);
+  let username = cx.string(userdat.username);
+  let password = cx.string(userdat.password);
+
+  JsUser.set(&mut cx, "Username", username)?;
+  JsUser.set(&mut cx, "Password", password)?;
+
+  Ok(JsUser)
+}
 
 fn handle_poll_friends(mut cx: FunctionContext) -> JsResult<JsArray> {
   let username = cx.argument::<JsString>(0)?.value();

@@ -1,14 +1,14 @@
 var userImage = "../placeholder/images/treti.png";
-var userName = "test";
+const { ipcRenderer } = require('electron')
 var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
 const sqlite3 = require('sqlite3').verbose();
 var tempName = "test"
 
 getSavedMessages(userImage, tempName);
-getMessages(userName);
+getMessages(tempName);
 setInterval(function(){
-    getMessages(userName);
+    getMessages(tempName);
 },500)
 
 function createMessage(messageInput, messageTime, userImage, userName) {
@@ -40,7 +40,10 @@ function update(chatWindow) {
     //chatWindow.scrollTop = chatWindow.scrollHeight;
     return messageInput;
 }
+
 function sendMessage() {
+    console.log(ipcRenderer.sendSync('synchronous-message', 'user?'))  
+
     var messageInput = document.forms['MessageForm']['messageInput'].value;
     if (messageInput.charAt(0) =='/'){
        messageInput = commands(messageInput)
@@ -95,8 +98,10 @@ function commands (messageInput) {
     return commandOut;
 }
 function getMessages(){
-    var recievedMessages = rabl_rust.poll_messages(userName)
-    console.log(recievedMessages);
+    var recievedMessages = rabl_rust.poll_messages(tempName)
+    let username = rabl_rust.deserialize_login()
+    console.log('deserialized username: ' + username.Username)
+    //console.log(recievedMessages);
     
     for(i = 0; i <recievedMessages.length; i++){
         let content = recievedMessages[i].Content

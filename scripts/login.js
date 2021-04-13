@@ -1,4 +1,17 @@
 const loginButton = document.getElementById('loginButton')
+const { ipcRenderer } = require('electron')
+const user = "test";
+var g_user = "unset";
+
+ipcRenderer.on('asynchronous-message', (event, arg) => {
+  console.log(arg)
+  event.reply('asynchronous-reply', g_user)
+})
+
+ipcRenderer.on('synchronous-message', (event, arg) => {
+  console.log(arg)
+  event.returnValue= 'FUCK NIGGER'
+})
 
 loginButton.addEventListener('click', () => {
     let username = document.getElementById('username').value;
@@ -7,6 +20,7 @@ loginButton.addEventListener('click', () => {
     
     try {
       if (rabl_rust.login(username, password)) {
+        rabl_rust.serialize_login(username, password);
         location.replace("../Views/main.html")
       } else {
         console.log('login failed')
@@ -17,3 +31,4 @@ loginButton.addEventListener('click', () => {
       console.log(login_error);
     }
 })
+

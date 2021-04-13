@@ -1,6 +1,5 @@
 const { app, BrowserWindow, Menu} = require('electron')
 
-
 app.allowRendererProcessReuse = false
 
 function createWindow () {
@@ -19,6 +18,8 @@ function createWindow () {
 
   win.loadFile('Views/login.html')
   win.openDevTools()
+
+  window.g_username = "test";
 }
 
 app.whenReady().then(createWindow)
