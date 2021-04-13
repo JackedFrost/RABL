@@ -45,12 +45,13 @@ function sendMessage() {
     if (messageInput.charAt(0) =='/'){
        messageInput = commands(messageInput)
     }
+    
     try {
         rabl_rust.send_message("test", "test", messageInput);
-        //console.log(rabl_rust.poll_messages("test"));
     } catch (send_message_error) {
         console.log(send_message_error)
     }
+    
     var messageTime = getMessageTime();
     var message = createMessage(messageInput, messageTime, userImage, userName);
     var messageSlot = document.createElement('li');
@@ -60,6 +61,8 @@ function sendMessage() {
     saveMessage(messageInput, messageTime, userName);
     return false;
 }
+
+//The commands function will trigger if a message is proceeded by a "/", it will trigger a switch on the message input following "/".
 function commands (messageInput) {
     let commandOut;
     let duelVal = (Math.floor(Math.random() * 3));
@@ -110,7 +113,7 @@ function getMessages(){
     }
 }
 
-
+// Database functions//
 function saveMessage(messageInput, messageTime,source){
     let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
     chatLog.serialize(function(){
