@@ -1,17 +1,6 @@
 const loginButton = document.getElementById('loginButton')
 const { ipcRenderer } = require('electron')
 const user = "test";
-var g_user = "unset";
-
-ipcRenderer.on('asynchronous-message', (event, arg) => {
-  console.log(arg)
-  event.reply('asynchronous-reply', g_user)
-})
-
-ipcRenderer.on('synchronous-message', (event, arg) => {
-  console.log(arg)
-  event.returnValue= 'FUCK NIGGER'
-})
 
 loginButton.addEventListener('click', () => {
     let username = document.getElementById('username').value;

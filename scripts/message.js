@@ -1,5 +1,4 @@
 var userImage = "../placeholder/images/treti.png";
-const { ipcRenderer } = require('electron')
 var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
 const sqlite3 = require('sqlite3').verbose();
