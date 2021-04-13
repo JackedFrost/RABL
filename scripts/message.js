@@ -1,19 +1,15 @@
-
 var userImage = "../placeholder/images/treti.png";
 var userName = "test";
 var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
-var file = "../database/chatLog.sqlite3"
-var sqlite3 = require('sqlite3').verbose();
+const sqlite3 = require('sqlite3').verbose();
+var tempName = "test"
 
-
-
-
-getMessages();
-
+getSavedMessages(userImage, tempName);
+getMessages(userName);
 setInterval(function(){
     getMessages(userName);
-},5000)
+},500)
 
 function createMessage(messageInput, messageTime, userImage, userName) {
     var html= `<div class="flex mx-5 my-3 py-4 border-5 border-gray-700"><div class="flex-none">
@@ -44,7 +40,7 @@ function update(chatWindow) {
     //chatWindow.scrollTop = chatWindow.scrollHeight;
     return messageInput;
 }
-function sendMessage(chatLog) {
+function sendMessage() {
     var messageInput = document.forms['MessageForm']['messageInput'].value;
     if (messageInput.charAt(0) =='/'){
        messageInput = commands(messageInput)
@@ -61,7 +57,7 @@ function sendMessage(chatLog) {
     messageSlot.innerHTML = message;
     messageList.appendChild(messageSlot);
     update();
-    //saveMessage(chatLog,messageInput, messageTime, userName)
+    saveMessage(messageInput, messageTime, userName);
     return false;
 }
 function commands (messageInput) {
@@ -108,33 +104,51 @@ function getMessages(){
         var messageSlot = document.createElement('li');
         messageSlot.innerHTML = message;
         messageList.appendChild(messageSlot);
-        /*if (recievedMessage != null){
-        saveMessage(recievedMessage, messageTime, recievedUser);
-        }*/
+        if (content != null || undefined ){
+        saveMessage(content, messageTime, source);
+        }
     }
 }
-/*
-function createLogs(){
-    let chatLog = new sqlite3.Database(file, sqlite3.OPEN_READWRITE | sqlite3.OPEN_CREATE);
+
+
+function saveMessage(messageInput, messageTime,source){
+    let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
     chatLog.serialize(function(){
-        chatLog.run("CREATE TABLE logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR)");
+        chatLog.run(`CREATE TABLE IF NOT EXISTS ${source}_logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR)`);
+    var Id = 1;
+    var messageID = Id++;
+    try{
+        var statement = chatLog.prepare(`INSERT INTO ${source}_logs VALUES (?,?,?,?)`);
+        statement.run(messageID, source, messageInput, messageTime);
+        statement.finalize();
+    }catch (error){
+        console.log(error)
+        alert("There was a problem storing the message, message will be deleted from chat window on refresh")
+    }   
+});
+}
+
+function getSavedMessages(userImage,tempName){
+    let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
+    let query =(`SELECT * from ${tempName}_logs`)
+    chatLog.all(query, [], (err,rows) =>{
+        if (err){
+            console.log(err);
+            return;
+        }
+        rows.forEach((row) => {
+        console.log(rows);
+        var message = createMessage(row.message,row.messageTime, userImage, row.userName);
+        var messageSlot = document.createElement('li');
+        messageSlot.innerHTML = message;
+        messageList.appendChild(messageSlot);
+        });
     });
+    chatLog.close();
 }
-function saveMessage(chatLog,messageInput, messageTime, userName){
-    let chatLog = new sqlite3.Database(file, sqlite3.OPEN_READWRITE);
-    var Id = 1
-    var messageID = Id ++
-    var statement = chatLog.prepare("INSERT INTO logs VALUES (?,?,?,?)");
-    statement.run(messageID, userName, messageInput, messageTime);
-    statement.finalize();
-}
-function getSavedMessages(){
-    chatlog.each("SELECT username, messageTime, message from logs", function(err,row){
-        createMessage(row.message, row.messageTime, row.userName);
-    });
-    chatlog.close();
-}
-*/
+
+
+
 
 
 
