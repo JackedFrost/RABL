@@ -8,7 +8,7 @@ var friendsList = document.getElementById("friendsList");
 for(i = 0; i <friends.length; i++){
 let friend = friends[i];
 var html = `<li class="text-gray-500 px-2 hover:text-gray-200 hover:bg-gray-750 py-1 my-2">
-<a href="" class="flex items-center">
+<a href="../views/directMessage.html" class="flex items-center">
   <span><a href="#"><img src="../placeholder/images/treti.png" class= "w-8 h-8 rounded-xl"></a></span>
   <span class="ml-2">${friend}</span>
 </a>
