@@ -5,6 +5,8 @@ use neon::prelude::*;
 mod client_core;
 use crate::client_core::*;
 use serde::{Serialize, Deserialize};
+use std::io::Write;
+use std::fs::OpenOptions;
 
 register_module!(mut cx, {
     cx.export_function("login", login_clicked)?;
@@ -13,6 +15,7 @@ register_module!(mut cx, {
     cx.export_function("poll_friends", handle_poll_friends)?;
     cx.export_function("serialize_login", serialize_login)?;
     cx.export_function("deserialize_login", deserialize_login)?;
+    cx.export_function("purge_userdat", purge_userdat)?;
     Ok(())
 });
 
@@ -28,19 +31,24 @@ fn serialize_login(mut cx: FunctionContext) -> JsResult<JsUndefined> {
   let password = cx.argument::<JsString>(1)?.value();
 
   let user = User { username, password }; 
-  let file = get_file("userdat.cbor").unwrap();
+  let file = OpenOptions::new().write(true).append(false).create(true).open("userdat.cbor").unwrap();
 
   match serde_cbor::to_writer(file, &user) {
     Ok(_) => println!("User login cached. TODO: Allow a user to disable this"),
-    Err(e) => eprintln!("Error writing serialized user data to file {:?}", e)
+    Err(e) => eprintln!("Error writing serialized user data to file {}", e)
   }
 
   Ok(cx.undefined())
 }
 
+fn purge_userdat(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+  let mut file = OpenOptions::new().write(true).append(false).open("userdat.cbor").unwrap();
+  file.write_all(b"").unwrap();
+  Ok(cx.undefined())
+}
 
 fn deserialize_login(mut cx: FunctionContext) -> JsResult<JsObject> {
-  let file = get_file("userdat.cbor").unwrap();
+  let file = OpenOptions::new().create(true).open("userdat.cbor").unwrap();
   let userdat: User = serde_cbor::from_reader(file).unwrap();
 
   let JsUser = JsObject::new(&mut cx);

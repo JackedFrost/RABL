@@ -1,7 +1,5 @@
-use std::{fs::File, io::{Read, Write}, net::TcpStream, str::from_utf8};
+use std::{fs::{File, OpenOptions}, io::{Read, Write}, net::TcpStream, str::from_utf8};
 use std::{error::Error, fmt};
-
-
 
 #[derive(Debug)]
 pub struct Message {
@@ -69,16 +67,9 @@ impl<T: Integer + fmt::Debug> fmt::Debug for NetBuffer<T> {
 
 pub fn get_file(path: &str) -> Result<File, Box<dyn Error>> { 
   // Attempt to open the file - if this fails, the file probably doesn't exist. Make it.
-  match File::open(path) {
-    Ok(file) => {
-      Ok(file)
-    },
-    Err(_) => {
-      match File::create(path) {
-        Ok(file) => Ok(file),
-        Err(e) => Err(Box::new(e))
-      }
-    }
+  match OpenOptions::new().write(true).create(true).open(path) {
+    Ok(f) => Ok(f),
+    Err(e) => (Err(Box::new(e)))
   }
 }
 // Internal lib function to establish a connection
