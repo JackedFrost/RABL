@@ -5,7 +5,7 @@ const sqlite3 = require('sqlite3').verbose();
 var sender = "test"
 var userName = "test"
 
-createTableIfNotExists();
+//Looks for messages in the datbase if it exists, if not it will make the database
 try{getSavedMessages(userImage, sender);}catch(error){createTableIfNotExists(sender);}
 getMessages(sender);
 setInterval(function(){
@@ -35,12 +35,15 @@ function getMessageTime() {
     var messageTime = `Today at ${tempTimeHours}:${tempTime.getMinutes()} ${AMPM}`;
     return messageTime;
 }
-function update(chatWindow) {
+function update() {
     var messageInput = document.forms['MessageForm']['messageInput'].value = "";
-    //This line is supposed to automatically keep the page scrolling to the most recent message
-    //chatWindow.scrollTop = chatWindow.scrollHeight;
+    autoScroll();
     return messageInput;
 }
+function autoScroll(){
+    chatWindow.scrollTop = chatWindow.scrollHeight;
+}
+
 
 function sendMessage() {
     var messageInput = document.forms['MessageForm']['messageInput'].value;
@@ -111,6 +114,7 @@ function getMessages(){
         messageList.appendChild(messageSlot);
         if (content != null || undefined ){
         saveMessage(content, messageTime, source);
+        autoScroll();
         }
     }
 }
@@ -155,6 +159,7 @@ function getSavedMessages(userImage,sender){
         });
     });
     chatLog.close();
+    autoScroll();
 }
 
 
