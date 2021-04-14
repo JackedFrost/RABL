@@ -48,7 +48,7 @@ fn purge_userdat(mut cx: FunctionContext) -> JsResult<JsUndefined> {
 }
 
 fn deserialize_login(mut cx: FunctionContext) -> JsResult<JsObject> {
-  let file = OpenOptions::new().create(true).open("userdat.cbor").unwrap();
+  let file = OpenOptions::new().read(true).open("userdat.cbor").unwrap();
   let userdat: User = serde_cbor::from_reader(file).unwrap();
 
   let JsUser = JsObject::new(&mut cx);
