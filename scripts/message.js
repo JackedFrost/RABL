@@ -2,8 +2,10 @@ var userImage = "../placeholder/images/treti.png";
 var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
 const sqlite3 = require('sqlite3').verbose();
-var sender = "test"
-var userName = "test"
+var sender = "test";
+let storedUsername = rabl_rust.deserialize_login();
+console.log(storedUsername);
+let username = storedUsername.Username.toString();
 
 //Looks for messages in the datbase if it exists, if not it will make the database
 try{getSavedMessages(userImage, sender);}catch(error){createTableIfNotExists(sender);}
@@ -12,11 +14,11 @@ setInterval(function(){
     getMessages(sender);
 },500)
 
-function createMessage(messageInput, messageTime, userImage, userName) {
+function createMessage(messageInput, messageTime, userImage, username) {
     var html= `<div class="flex mx-5 my-3 py-4 border-5 border-gray-700"><div class="flex-none">
-            <a href="#"><img src=" ${userImage}"alt=" ${userName}_img" class="w-10 h-10 rounded-xl"></img></a>
+            <a href="#"><img src=" ${userImage}"alt=" ${username}_img" class="w-10 h-10 rounded-xl"></img></a>
             </div><div class="ml-5"><div>
-            <a href="#" class="text-white hover:underline">${userName}</a>
+            <a href="#" class="text-white hover:underline">${username}</a>
             <span class="text-xs text-gray-600 ml-1">${messageTime} </span></div>
             <div><div>${messageInput} </div></div></div></div></div>`;
     return html;
@@ -52,18 +54,18 @@ function sendMessage() {
     }
     
     try {
-        rabl_rust.send_message("test", "test", messageInput);
+        rabl_rust.send_message(username, "test", messageInput);
     } catch (send_message_error) {
         console.log(send_message_error)
     }
     
     var messageTime = getMessageTime();
-    var message = createMessage(messageInput, messageTime, userImage, userName);
+    var message = createMessage(messageInput, messageTime, userImage, username);
     var messageSlot = document.createElement('li');
     messageSlot.innerHTML = message;
     messageList.appendChild(messageSlot);
     update();
-    saveMessage(messageInput, messageTime, userName);
+    saveMessage(messageInput, messageTime, username);
     return false;
 }
 
@@ -100,9 +102,7 @@ function commands (messageInput) {
     return commandOut;
 }
 function getMessages(){
-    let storedUsername = rabl_rust.deserialize_login()
-    console.log('deserialized username: ' + storedUsername.Username)  
-    var recievedMessages = rabl_rust.poll_messages(storedUsername.Username)
+    var recievedMessages = rabl_rust.poll_messages(username.Username)
     for(i = 0; i <recievedMessages.length; i++){
         let content = recievedMessages[i].Content
         let source = recievedMessages[i].Source
@@ -123,13 +123,13 @@ function getMessages(){
 function createTableIfNotExists(sender){
     let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
     chatLog.serialize(function(){
-        chatLog.run(`CREATE TABLE IF NOT EXISTS ${sender}_logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR)`);
+        chatLog.run(`CREATE TABLE IF NOT EXISTS ${sender}_logs (messageID INT,username VARCHAR, message TEXT, messageTime VARCHAR)`);
     })
 }
 function saveMessage(messageInput, messageTime,source){
     let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
     chatLog.serialize(function(){
-        chatLog.run(`CREATE TABLE IF NOT EXISTS ${source}_logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR)`);
+        chatLog.run(`CREATE TABLE IF NOT EXISTS ${source}_logs (messageID INT,username VARCHAR, message TEXT, messageTime VARCHAR)`);
     var Id = 1;
     var messageID = Id++;
     try{
@@ -152,7 +152,7 @@ function getSavedMessages(userImage,sender){
             return;
         }
         rows.forEach((row) => {
-        var message = createMessage(row.message,row.messageTime, userImage, row.userName);
+        var message = createMessage(row.message,row.messageTime, userImage, row.username);
         var messageSlot = document.createElement('li');
         messageSlot.innerHTML = message;
         messageList.appendChild(messageSlot);
