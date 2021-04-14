@@ -1,5 +1,4 @@
 const loginButton = document.getElementById('loginButton')
-const { ipcRenderer } = require('electron')
 const user = "test";
 
 loginButton.addEventListener('click', () => {

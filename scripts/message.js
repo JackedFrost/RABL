@@ -2,12 +2,14 @@ var userImage = "../placeholder/images/treti.png";
 var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
 const sqlite3 = require('sqlite3').verbose();
-var tempName = "test"
+var sender = "test"
+var userName = "test"
 
-getSavedMessages(userImage, tempName);
-getMessages(tempName);
+createTableIfNotExists();
+try{getSavedMessages(userImage, sender);}catch(error){createTableIfNotExists(sender);}
+getMessages(sender);
 setInterval(function(){
-    getMessages(tempName);
+    getMessages(sender);
 },500)
 
 function createMessage(messageInput, messageTime, userImage, userName) {
@@ -41,8 +43,6 @@ function update(chatWindow) {
 }
 
 function sendMessage() {
-    console.log(ipcRenderer.sendSync('synchronous-message', 'user?'))  
-
     var messageInput = document.forms['MessageForm']['messageInput'].value;
     if (messageInput.charAt(0) =='/'){
        messageInput = commands(messageInput)
@@ -97,11 +97,9 @@ function commands (messageInput) {
     return commandOut;
 }
 function getMessages(){
-    var recievedMessages = rabl_rust.poll_messages(tempName)
-    let username = rabl_rust.deserialize_login()
-    console.log('deserialized username: ' + username.Username)
-    //console.log(recievedMessages);
-    
+    let storedUsername = rabl_rust.deserialize_login()
+    console.log('deserialized username: ' + storedUsername.Username)  
+    var recievedMessages = rabl_rust.poll_messages(storedUsername.Username)
     for(i = 0; i <recievedMessages.length; i++){
         let content = recievedMessages[i].Content
         let source = recievedMessages[i].Source
@@ -118,6 +116,12 @@ function getMessages(){
 }
 
 // Database functions//
+function createTableIfNotExists(sender){
+    let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
+    chatLog.serialize(function(){
+        chatLog.run(`CREATE TABLE IF NOT EXISTS ${sender}_logs (messageID INT,userName VARCHAR, message TEXT, messageTime VARCHAR)`);
+    })
+}
 function saveMessage(messageInput, messageTime,source){
     let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
     chatLog.serialize(function(){
@@ -135,16 +139,15 @@ function saveMessage(messageInput, messageTime,source){
 });
 }
 
-function getSavedMessages(userImage,tempName){
+function getSavedMessages(userImage,sender){
     let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
-    let query =(`SELECT * from ${tempName}_logs`)
+    let query =(`SELECT * from ${sender}_logs`)
     chatLog.all(query, [], (err,rows) =>{
         if (err){
             console.log(err);
             return;
         }
         rows.forEach((row) => {
-        console.log(rows);
         var message = createMessage(row.message,row.messageTime, userImage, row.userName);
         var messageSlot = document.createElement('li');
         messageSlot.innerHTML = message;
