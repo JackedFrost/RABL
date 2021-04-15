@@ -107,13 +107,17 @@ pub fn login(username: String, password: String) -> Result<bool, Box<dyn Error>>
       panic!("{}", &err.to_string());
   }
 
-    // 16 byte buffer
-    let mut incoming_data = [0 as u8; 16];
+    // 128 byte buffer - though this is likely overkill
+    let mut incoming_data = [0 as u8; 128];
     let data_size = stream.read(&mut incoming_data).unwrap();
     let response = from_utf8(&incoming_data[0..data_size]).unwrap();
 
+    //TODO: The server will now respond with, for ex, login.grant.Admin
+    // this will ensure the username data we query SQL for is sent back to us in the proper capitalization
+    // as currently, logging in with 'admin' will login you in as *'Admin'*, but the client will continue
+    // to send server requests with 'admin'
+
   if response == "login.grant" {
-      println!("Login successful!");
       Ok(true)
   } else {
       Ok(false)
@@ -138,9 +142,9 @@ pub fn poll_messages(username: String) -> Result<Option<Vec<Message>>, Box<dyn E
 
   stream.write(&payload)?;
 
-  // Create the buffer, currently 128 bytes
+  // Create the buffer, currently 32_768 bytes
   // we then 'read' into the buffer, filling it with whatever the server sends us
-  let mut buffer = [0 as u8; 128];
+  let mut buffer = [0 as u8; 32_768];
   stream.read(&mut buffer)?;
 
   // Now we need to take that buffer and make an vec of messages, assuming the server did not respond with nil
@@ -192,7 +196,7 @@ pub fn poll_friends(username: String) -> Result<Vec<String>, Box<dyn Error>> {
   let payload = build_payload(vec!["pollfriends".to_string(), username]);
 
   stream.write(&payload)?;
-  let mut buffer = [0 as u8; 256];
+  let mut buffer = [0 as u8; 4096];
   let _data_len = stream.read(&mut buffer)?;
 
   let mut friends_list: Vec<String> = Vec::new();
