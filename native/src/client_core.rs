@@ -1,5 +1,13 @@
 use std::{fs::{File, OpenOptions}, io::{Read, Write}, net::TcpStream, str::from_utf8};
 use std::{error::Error, fmt};
+use serde::{Serialize, Deserialize};
+
+#[derive(Serialize, Deserialize)]
+pub struct User {
+  pub username: String,
+  pub password: String
+  //last_login: Time,
+}
 
 #[derive(Debug)]
 pub struct Message {
@@ -90,17 +98,19 @@ pub fn build_payload(components: Vec<String>) -> Vec<u8> {
         payload.append(&mut x);
         if i == components.len() - 1 {
             // End of payload
-            payload.push(31);
+            payload.push(23);
         } else {
             // End of payload unit
-            payload.push(29);
+            payload.push(31);
         }
     }
     payload
 }
 
 pub fn login(username: String, password: String) -> Result<bool, Box<dyn Error>> {
-  let payload = build_payload(vec!["login".to_string(), username, password]);
+  let payload = build_payload(vec!["login".to_string(), username, password.clone()]);
+  println!("sending {:?}", payload);
+
   // Establish connection and write the payload
   let mut stream = establish_connection().unwrap();
   if let Err(err) = stream.write(&payload) {
@@ -108,20 +118,46 @@ pub fn login(username: String, password: String) -> Result<bool, Box<dyn Error>>
   }
 
     // 128 byte buffer - though this is likely overkill
-    let mut incoming_data = [0 as u8; 128];
-    let data_size = stream.read(&mut incoming_data).unwrap();
-    let response = from_utf8(&incoming_data[0..data_size]).unwrap();
+  let mut incoming_data = [0 as u8; 128];
+  let data_size = stream.read(&mut incoming_data).unwrap();
+  let response = from_utf8(&incoming_data[0..data_size]).unwrap();
 
-    //TODO: The server will now respond with, for ex, login.grant.Admin
-    // this will ensure the username data we query SQL for is sent back to us in the proper capitalization
-    // as currently, logging in with 'admin' will login you in as *'Admin'*, but the client will continue
-    // to send server requests with 'admin'
+  println!("{:?}", response);
 
-  if response == "login.grant" {
+  let mut qualified_username = String::new();
+  for (i, b) in incoming_data.iter().enumerate() {
+    if b == &23 {
+
+      let mut c: &u8 = &0;
+      let mut j: usize = i;
+      while c != &31 {
+        c = &incoming_data[j];
+        j -= 1;
+      }
+
+      qualified_username = from_utf8(&incoming_data[j+2..i]).unwrap().to_owned();
+    }
+  }
+
+  serialize(qualified_username.to_owned(), password);
+  // this will ensure the username data we query SQL for is sent back to us in the proper capitalization
+  // as currently, logging in with 'admin' will login you in as *'Admin'*, but the client will continue
+  // to send server requests with 'admin'
+  Ok(true) 
+  /*if response == "login.grant" {
       Ok(true)
   } else {
       Ok(false)
-  }  
+  }*/  
+}
+
+pub fn serialize(username: String, password: String) {
+  let user = User { username, password };
+  let file = OpenOptions::new().write(true).append(false).create(true).open("usr/userdat.cbor").unwrap();
+  match serde_cbor::to_writer(file, &user) {
+    Ok(_) => println!("User login cached. TODO: Allow a user to disable this"),
+    Err(e) => eprintln!("Error writing serialized user data to file {}", e)
+  } 
 }
 
 pub fn send_message(sender: String, target: String, message: String) -> Result<(), Box<dyn Error>>{
