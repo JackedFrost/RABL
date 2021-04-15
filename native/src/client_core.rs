@@ -1,4 +1,4 @@
-use std::{fs::{File, OpenOptions}, io::{Read, Write}, net::TcpStream, str::from_utf8};
+use std::{fs::{OpenOptions}, io::{Read, Write}, net::TcpStream, str::from_utf8};
 use std::{error::Error, fmt};
 use serde::{Serialize, Deserialize};
 
@@ -43,12 +43,12 @@ impl Error for RablParseError {
     &self.error
   }
 }
-
+/*
 struct NetBuffer { 
   buffer: [u8; 4096],
   len: usize
 }
-/*
+
 impl NetBuffer {
   fn split_by_unit(&self) -> Vec<String> {
     let v: Vec<u8> = Vec::new();
@@ -73,13 +73,6 @@ impl<T: Integer + fmt::Debug> fmt::Debug for NetBuffer<T> {
 }
 */
 
-pub fn get_file(path: &str) -> Result<File, Box<dyn Error>> { 
-  // Attempt to open the file - if this fails, the file probably doesn't exist. Make it.
-  match OpenOptions::new().write(true).create(true).open(path) {
-    Ok(f) => Ok(f),
-    Err(e) => (Err(Box::new(e)))
-  }
-}
 // Internal lib function to establish a connection
 fn establish_connection() -> Result<TcpStream, Box<dyn Error>> {
     match TcpStream::connect("64.227.87.184:5050") {
@@ -107,9 +100,54 @@ pub fn build_payload(components: Vec<String>) -> Vec<u8> {
     payload
 }
 
+
+pub fn parse_unit_tokens(incoming_data: Vec<u8>) -> Vec<String> {
+  let mut tokens: Vec<String> = Vec::new();
+  let mut cursor = 0 as usize;
+  for (i, byte) in incoming_data.iter().enumerate() {
+    if byte == &31{
+      let slice = &incoming_data[cursor..i];
+      let string = from_utf8(&slice).unwrap();
+      tokens.push(string.to_owned());
+    }
+
+    cursor = i+1;
+  }
+  tokens
+}
+
+pub fn poll_servers(username: String) -> Result<Option<Vec<String>>, Box<dyn Error>> {
+  let mut stream = establish_connection().unwrap();
+  let payload = build_payload(vec!["pollservers".to_string(), username]);
+
+  stream.write(&payload).unwrap();
+
+  let incoming_data = [0 as u8; 1024];
+  
+  let mut servers: Vec<String> = Vec::new();
+  let mut cursor: usize = 0;
+  for (i, byte) in incoming_data.iter().enumerate() {
+    if byte == &31 || byte == &23 {
+      let slice = &incoming_data[cursor..i];
+      
+      match from_utf8(&slice) {
+        Ok(some_utf) => { servers.push(some_utf.to_string()) },
+        Err(utf_err) => return Err(Box::new(utf_err))
+      }
+
+      cursor = i+1;
+    }
+  }
+  
+  if servers.len() >= 1 {
+    Ok(Some(servers))
+  } else {
+    Ok(None)
+  }
+}
+
 pub fn login(username: String, password: String) -> Result<bool, Box<dyn Error>> {
   let payload = build_payload(vec!["login".to_string(), username, password.clone()]);
-  println!("sending {:?}", payload);
 
   // Establish connection and write the payload
   let mut stream = establish_connection().unwrap();
@@ -120,9 +158,6 @@ pub fn login(username: String, password: String) -> Result<bool, Box<dyn Error>>
     // 128 byte buffer - though this is likely overkill
   let mut incoming_data = [0 as u8; 128];
   let data_size = stream.read(&mut incoming_data).unwrap();
-  let response = from_utf8(&incoming_data[0..data_size]).unwrap();
-
-  println!("{:?}", response);
 
   let mut qualified_username = String::new();
   for (i, b) in incoming_data.iter().enumerate() {
@@ -140,15 +175,28 @@ pub fn login(username: String, password: String) -> Result<bool, Box<dyn Error>>
   }
 
   serialize(qualified_username.to_owned(), password);
-  // this will ensure the username data we query SQL for is sent back to us in the proper capitalization
-  // as currently, logging in with 'admin' will login you in as *'Admin'*, but the client will continue
-  // to send server requests with 'admin'
-  Ok(true) 
-  /*if response == "login.grant" {
-      Ok(true)
-  } else {
-      Ok(false)
-  }*/  
+  
+  match from_utf8(&incoming_data[0..data_size]) {
+    Ok(utf) => {
+      let tokens = parse_unit_tokens(utf.to_owned().into_bytes());
+      match tokens.get(1) {
+        Some(answer) => {
+          if answer == "grant" {
+            return Ok(true)
+          } else {
+            return Ok(false)
+          }
+        },
+        None => {
+          let login_err = from_utf8(&incoming_data[0..=data_size]).unwrap();
+          panic!("{}", login_err);
+        }
+      }
+    },
+    Err(utf_err) => {
+      panic!("{}", utf_err)
+    }
+  }
 }
 
 pub fn serialize(username: String, password: String) {
