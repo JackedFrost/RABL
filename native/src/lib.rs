@@ -4,7 +4,6 @@ use neon::prelude::*;
 
 mod client_core;
 use crate::client_core::*;
-use serde::{Serialize, Deserialize};
 use std::io::Write;
 use std::fs::OpenOptions;
 
@@ -20,7 +19,7 @@ register_module!(mut cx, {
 
 
 fn purge_userdat(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-  let mut file = OpenOptions::new().write(true).append(false).open("userdat.cbor").unwrap();
+  let mut file = OpenOptions::new().write(true).truncate(true).open("usr/userdat.cbor").unwrap();
   file.write_all(b"").unwrap();
   Ok(cx.undefined())
 }
