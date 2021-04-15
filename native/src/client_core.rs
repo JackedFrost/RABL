@@ -105,13 +105,13 @@ pub fn parse_unit_tokens(incoming_data: Vec<u8>) -> Vec<String> {
   let mut tokens: Vec<String> = Vec::new();
   let mut cursor = 0 as usize;
   for (i, byte) in incoming_data.iter().enumerate() {
-    if byte == &31{
-      let slice = &incoming_data[cursor..i];
+    if byte == &31 {
+      let slice: &[u8] = &incoming_data[cursor..i];
       let string = from_utf8(&slice).unwrap();
       tokens.push(string.to_owned());
-    }
 
-    cursor = i+1;
+      cursor = i+1;
+    }
   }
   tokens
 }
