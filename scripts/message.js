@@ -3,9 +3,7 @@ var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
 const sqlite3 = require('sqlite3').verbose();
 var sender = getFriendName();
-console.log(sender);
 let storedUsername = rabl_rust.deserialize_login();
-console.log(storedUsername);
 let username = storedUsername.Username.toString();
 
 //Looks for messages in the datbase if it exists, if not it will make the database
@@ -62,7 +60,7 @@ function sendMessage() {
     }
     
     try {
-        rabl_rust.send_message(username, sender, messageInput);
+        rabl_rust.send_message(sender, username, messageInput);
     } catch (send_message_error) {
         console.log(send_message_error)
     }

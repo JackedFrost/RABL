@@ -8,7 +8,7 @@ Saved Messages
 var friendName = getFriendName();
 //header bar label for current Friends DM
 var bannerText = document.getElementById('bannerText');
-bannerText.innerText = friendName;
+bannerText.innerText = `Chatting With ${friendName}`;
 
 function getFriendName(){
     let usp = new URLSearchParams(window.location.search);
