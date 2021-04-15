@@ -60,7 +60,7 @@ function sendMessage() {
     }
     
     try {
-        rabl_rust.send_message(sender, username, messageInput);
+        rabl_rust.send_message(username, sender, messageInput);
     } catch (send_message_error) {
         console.log(send_message_error)
     }
