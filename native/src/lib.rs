@@ -14,12 +14,43 @@ register_module!(mut cx, {
     cx.export_function("poll_friends", handle_poll_friends)?;
     cx.export_function("deserialize_login", deserialize_login)?;
     cx.export_function("purge_userdat", purge_userdat)?;
+    cx.export_function("poll_servers", handle_poll_servers)?;
     Ok(())
 });
 
+fn handle_poll_servers(mut cx: FunctionContext) -> JsResult<JsArray> {
+  let username = cx.argument::<JsString>(0)?.value();
+
+  match poll_servers(username) {
+    Ok(result) => {
+      match result {
+        Some(servers) => {
+          let JsServerArray = JsArray::new(&mut cx, servers.len() as u32);
+        
+          for (i, server) in servers.iter().enumerate() {
+            let server = cx.string(server);
+            JsServerArray.set(&mut cx, i as u32, server)?;
+          }
+
+          Ok(JsServerArray)
+        },
+        None => {
+          Ok(cx.empty_array())
+        }
+      }
+    },
+    Err(poll_err) => {
+      panic!("RABL_RUST ENCOUNTERED ERROR POLLING SERVER LIST: {}", poll_err)
+    }
+  }
+}
 
 fn purge_userdat(mut cx: FunctionContext) -> JsResult<JsUndefined> {
-  let mut file = OpenOptions::new().write(true).truncate(true).open("usr/userdat.cbor").unwrap();
+  let mut file = OpenOptions::new()
+    .write(true)
+    .truncate(true)
+    .open("usr/userdat.cbor")
+    .unwrap();
   file.write_all(b"").unwrap();
   Ok(cx.undefined())
 }
