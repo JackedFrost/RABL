@@ -2,16 +2,18 @@ var userImage = "../placeholder/images/treti.png";
 var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
 const sqlite3 = require('sqlite3').verbose();
-var sender = "test";
+var sender = getFriendName();
+console.log(sender);
 let storedUsername = rabl_rust.deserialize_login();
 console.log(storedUsername);
 let username = storedUsername.Username.toString();
 
 //Looks for messages in the datbase if it exists, if not it will make the database
-try{getSavedMessages(userImage, sender);}catch(error){createTableIfNotExists(sender);}
-getMessages(sender);
+createTableIfNotExists(sender)
+getSavedMessages(userImage, sender);
+getMessages();
 setInterval(function(){
-    getMessages(sender);
+    getMessages();
 },500)
 
 function createMessage(messageInput, messageTime, userImage, username) {
@@ -22,6 +24,12 @@ function createMessage(messageInput, messageTime, userImage, username) {
             <span class="text-xs text-gray-600 ml-1">${messageTime} </span></div>
             <div><div>${messageInput} </div></div></div></div></div>`;
     return html;
+}
+function getFriendName(){
+    let usp = new URLSearchParams(window.location.search);
+    var friendName = usp.get('friend');
+    console.log(friendName);
+    return friendName
 }
 function getMessageTime() {
     var tempTime = new Date();
@@ -54,7 +62,7 @@ function sendMessage() {
     }
     
     try {
-        rabl_rust.send_message(username, "test", messageInput);
+        rabl_rust.send_message(username, sender, messageInput);
     } catch (send_message_error) {
         console.log(send_message_error)
     }
@@ -102,7 +110,7 @@ function commands (messageInput) {
     return commandOut;
 }
 function getMessages(){
-    var recievedMessages = rabl_rust.poll_messages(username.Username)
+    var recievedMessages = rabl_rust.poll_messages(username)
     for(i = 0; i <recievedMessages.length; i++){
         let content = recievedMessages[i].Content
         let source = recievedMessages[i].Source

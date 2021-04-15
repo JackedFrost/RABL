@@ -4,7 +4,15 @@ Saved Messages
 
 
 */
-//header bar label for current Friends DM
-var friendHeaderLabel = document.getElementById('FriendHeaderLabel');
-friendHeaderLabel.innerText() = User.friendName;
 
+var friendName = getFriendName();
+//header bar label for current Friends DM
+var bannerText = document.getElementById('bannerText');
+bannerText.innerText = friendName;
+
+function getFriendName(){
+    let usp = new URLSearchParams(window.location.search);
+    var friendName = usp.get('friend');
+    console.log(friendName);
+    return friendName
+}

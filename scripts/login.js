@@ -9,7 +9,7 @@ loginButton.addEventListener('click', () => {
     try {
       if (rabl_rust.login(username, password)) {
         rabl_rust.serialize_login(username, password);
-        location.replace("../Views/main.html")
+        location.replace("../Views/friends.html")
       } else {
         console.log('login failed')
         alert(message);
