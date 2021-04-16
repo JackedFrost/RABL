@@ -122,7 +122,8 @@ pub fn poll_servers(username: String) -> Result<Option<Vec<String>>, Box<dyn Err
 
   stream.write(&payload).unwrap();
 
-  let incoming_data = [0 as u8; 1024];
+  let mut incoming_data = [0 as u8; 1024];
+  let _ = stream.read(&mut incoming_data).unwrap();
   
   let mut servers: Vec<String> = Vec::new();
   let mut cursor: usize = 0;
