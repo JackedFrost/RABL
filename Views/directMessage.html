@@ -13,7 +13,7 @@
         <ul class="text-center">
           <li><a href="friends.html"><img src="../assets/Images/Rabl_Logo_gradient.png" alt="RABL" class="w-12 h-12 rounded-xl mx-auto"></a></li>
           <li class="border-b border-gray-700 mx-4 mt-3"></li>
-          <ul class="serversList">
+          <ul id="serversList">
             <li>
 
             </li>
@@ -127,10 +127,10 @@
           <!-- User Info Section-->
           <div class="bg-gray-800 px-2 py-2 flex items-center justify-between">
             <div class="flex items-center">
-              <a href="#"><img src="../placeholder/images/treti.png" class="w-8 h-8 rounded-xl"></a>
+              <a href="settings.html" id="Settings"><img src="../placeholder/images/treti.png" class="w-8 h-8 rounded-xl"></a>
               <div class="text-xs ml-2">
-                <div class="text-white">Test</div>
-                <div class="text-gray-500 text-xxs">Filler Status</div>
+                <div class="text-white" id="username_field">Test</div>
+                <div class="text-gray-500 text-xxs" id="userStatus">Filler Status</div>
               </div>
             </div>
             <!--Controls-->
@@ -203,25 +203,15 @@
         </div>
       </div>
     </form>
-        <!-- Online Users-->
-          <div class="test-sm bg-gray-800 w-56 flex-none px-3 py-3 overflow-y-auto">
-            <h3 class="uppercase tracking-wide font-semibold text-sm text-gray-500 mb-2">Test Users -1</h3>
-            <ul class="mb-6 truncate">
-              <li class="text-gray-500 px-2 hover:text-gray-200 hover:bg-gray-750 py-1 my-2">
-                <a href="" class="flex items-center">
-                  <span><a href="#"><img src="../placeholder/images/treti.png" class= "w-8 h-8 rounded-xl"></a></span>
-                  <span class="ml-2">Treti</span>
-                </a>
-              </li>
-            </ul>
-            <div>
             </div>
           </div>
         </div> 
       </div>
 </body>
 <script src="../lib/index.js"></script>
+<script src = "../scripts/userInfo.js"></script>
 <script src="../scripts/message.js"></script>
 <script src="../scripts/logout.js"></script>
+<script src="../scripts/servers.js"></script>
 <script src="../scripts/directMessage.js"></script>
 </html>

@@ -6,3 +6,4 @@ native/artifacts.json
 **/.DS_Store
 logs.db
 usr/userdat.cbor
+assets/css/styles.css

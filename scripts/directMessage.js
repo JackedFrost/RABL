@@ -13,6 +13,5 @@ bannerText.innerText = `Chatting With ${friendName}`;
 function getFriendName(){
     let usp = new URLSearchParams(window.location.search);
     var friendName = usp.get('friend');
-    console.log(friendName);
     return friendName
 }

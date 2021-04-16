@@ -1,6 +1,3 @@
-let storedUsername = rabl_rust.deserialize_login();
-let username = storedUsername.Username.toString();
-
 getFriendsList();
 
 function getFriendsList(){
@@ -15,7 +12,6 @@ for(i = 0; i <friends.length; i++){
 function updateGUI(friend){
   const queryStr = `friend=${friend}`;
   let usp = new URLSearchParams(queryStr);
-  console.log(usp.toString());
   var friendsList = document.getElementById("friendsList");
   var html = `<li class="text-gray-500 px-2 hover:text-gray-200 hover:bg-gray-750 py-1 my-2">
   <a href="" class="flex items-center">
@@ -23,7 +19,7 @@ function updateGUI(friend){
   <span class="ml-2">${friend}</span>
   </a>
   </li>`
-  console.log(html)
+  
   var friendSlot = document.createElement('li');
   friendSlot.innerHTML = html;
   friendsList.appendChild(friendSlot);

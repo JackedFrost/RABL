@@ -14,7 +14,7 @@ function createWindow () {
   })
   var menu= null
   Menu.setApplicationMenu(menu)
-  win.setResizable(false)
+  //win.setResizable(true)
 
   win.loadFile('Views/login.html')
   win.openDevTools()
@@ -35,11 +35,5 @@ app.on('activate', () => {
   }
 })
 app.once('ready-to-show', () => {
-  if (addon.login(username, password)) {
-    console.log("ok")
-    win.show()
-  } else {
-    console.log("no")
-    win.show()
-  }
+  win.show();
 })
