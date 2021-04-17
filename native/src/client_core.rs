@@ -212,6 +212,15 @@ pub fn serialize(username: String, password: String) {
   } 
 }
 
+pub fn send_server_message(sender: String, target: String, message: String) -> Result<(), Box<dyn Error>> {
+  let payload = build_payload(vec!["srvrmsg".to_string(), sender, target, message]);
+
+  let mut stream = establish_connection()?;
+  stream.write(&payload)?;
+
+  Ok(())
+}
+
 pub fn send_message(sender: String, target: String, message: String) -> Result<(), Box<dyn Error>>{
   let payload = build_payload(vec!["msg".to_string(), sender, target, message]);
 

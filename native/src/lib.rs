@@ -11,6 +11,7 @@ use std::io::Read;
 register_module!(mut cx, {
     cx.export_function("login", login_clicked)?;
     cx.export_function("send_message", send_message_clicked)?;
+    cx.export_function("send_server_message", send_server_message_clicked)?;
     cx.export_function("poll_messages", poll_messages_clicked)?;
     cx.export_function("poll_friends", handle_poll_friends)?;
     cx.export_function("deserialize_login", deserialize_login)?;
@@ -107,6 +108,15 @@ fn test_server_msg(mut cx: FunctionContext) -> JsResult<JsUndefined> {
   connection.read(&mut buff).unwrap();
 
   println!("{:?}", buff);
+  Ok(cx.undefined())
+}
+
+fn send_server_message_clicked(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+  let sender = cx.argument::<JsString>(0)?.value();
+  let target = cx.argument::<JsString>(1)?.value();
+  let message = cx.argument::<JsString>(2)?.value();
+
+  send_server_message(sender, target, message).unwrap();
   Ok(cx.undefined())
 }
 
