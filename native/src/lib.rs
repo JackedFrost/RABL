@@ -6,6 +6,7 @@ mod client_core;
 use crate::client_core::*;
 use std::io::Write;
 use std::fs::OpenOptions;
+use std::io::Read;
 
 register_module!(mut cx, {
     cx.export_function("login", login_clicked)?;
@@ -15,6 +16,7 @@ register_module!(mut cx, {
     cx.export_function("deserialize_login", deserialize_login)?;
     cx.export_function("purge_userdat", purge_userdat)?;
     cx.export_function("poll_servers", handle_poll_servers)?;
+    cx.export_function("test_server_msg", test_server_msg)?;
     Ok(())
 });
 
@@ -97,6 +99,17 @@ fn login_clicked(mut cx: FunctionContext) -> JsResult<JsBoolean> {
     }
 }
 
+fn test_server_msg(mut cx: FunctionContext) -> JsResult<JsUndefined> {
+  let payload = build_payload(vec!["srvrmsg".to_owned(), "test".to_string(), "server_General".to_string(), "TESTING SRV".to_owned()]); 
+  let mut connection = establish_connection().unwrap();
+  let _ = connection.write(&payload).unwrap();
+  let mut buff = [0 as u8; 256]; 
+  connection.read(&mut buff).unwrap();
+
+  println!("{:?}", buff);
+  Ok(cx.undefined())
+}
+
 fn send_message_clicked(mut cx: FunctionContext) -> JsResult<JsUndefined> {
     // Gathering parameters from JavaScript
     let sender = cx.argument::<JsString>(0)?.value();
@@ -118,15 +131,26 @@ fn poll_messages_clicked(mut cx:FunctionContext) -> JsResult<JsArray> {
       // iterate (enumerate) the (Rust) vector of messages, and map each message to our JS array
       // by creating new JSON objects for each entry in the vector
       for (i, message) in messages.iter().enumerate() { 
-        let JsMessageObject = JsObject::new(&mut cx);
         let source = cx.string(message.source.clone());
         let content = cx.string(message.content.clone());
 
-        JsMessageObject.set(&mut cx, "Source", source)?;
-        JsMessageObject.set(&mut cx, "Content", content)?;
+        if !message.is_dm {
+          let server = cx.string(message.server.clone());
+          let JsSrvrMessageObj = JsObject::new(&mut cx);
+          JsSrvrMessageObj.set(&mut cx, "Server", server)?;
+          JsSrvrMessageObj.set(&mut cx, "Source", source)?;
+          JsSrvrMessageObj.set(&mut cx, "Content", content)?;
 
-        // Set the newly created JSON Message object into the array
-        JsMessageArray.set(&mut cx, i as u32, JsMessageObject).unwrap();
+          JsMessageArray.set(&mut cx, i as u32, JsSrvrMessageObj)?;
+        } else {
+          let JsMessageObject = JsObject::new(&mut cx);
+          JsMessageObject.set(&mut cx, "Source", source)?;
+          JsMessageObject.set(&mut cx, "Content", content)?;
+
+          // Set the newly created JSON Message object into the array
+          JsMessageArray.set(&mut cx, i as u32, JsMessageObject)?;
+        }
+
       }
       // Return the array
       Ok(JsMessageArray)

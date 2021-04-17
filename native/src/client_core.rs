@@ -11,6 +11,8 @@ pub struct User {
 
 #[derive(Debug)]
 pub struct Message {
+    pub server: String,
+    pub is_dm: bool,
     pub source: String,
     pub content: String
 }
@@ -43,6 +45,7 @@ impl Error for RablParseError {
     &self.error
   }
 }
+
 /*
 struct NetBuffer { 
   buffer: [u8; 4096],
@@ -74,7 +77,7 @@ impl<T: Integer + fmt::Debug> fmt::Debug for NetBuffer<T> {
 */
 
 // Internal lib function to establish a connection
-fn establish_connection() -> Result<TcpStream, Box<dyn Error>> {
+pub fn establish_connection() -> Result<TcpStream, Box<dyn Error>> {
     match TcpStream::connect("64.227.87.184:5050") {
         Ok(stream) => {
             Ok(stream)
@@ -232,6 +235,8 @@ pub fn poll_messages(username: String) -> Result<Option<Vec<Message>>, Box<dyn E
   let mut buffer = [0 as u8; 32_768];
   stream.read(&mut buffer)?;
 
+  println!("{:?}", &buffer[0..30]);
+
   // Now we need to take that buffer and make an vec of messages, assuming the server did not respond with nil
   // First, check to see if buffer contains 'nil', if so simply return None
   // Otherwise, we build the vec from the buffer contents
@@ -253,18 +258,60 @@ pub fn poll_messages(username: String) -> Result<Option<Vec<Message>>, Box<dyn E
           // This will effectively create a sub slice, of each source:msg block
           let slice = &buffer[cursor..i].to_owned();
 
-          for (j, x) in slice.iter().enumerate() {
-            // Now we iterate the sub slice, looking for the ascii-31, which we use to seperate source from msg
-            if x == &31 {
-              // Attempt to parse the source and message from bytes to utf-8
-              match (from_utf8(&slice[0..j]), from_utf8(&slice[j+1..slice.len()])) {
-                (Ok(source), Ok(message)) => {
-                  messages.push(Message { source: source.to_string(), content: message.to_string() } )
-                },
-                _ => return Err(Box::new(RablParseError::new("Failed to parse in poll_messages")))
-              }  
+          // Count number of unit seperators to determine message type
+          let mut unit_count = 0_usize;
+          for (k, b) in slice.iter().enumerate() {
+            if b == &31 {
+              unit_count += 1;
             }
           }
+
+          // DM
+          if unit_count == 1 {
+            println!("DM!!!");
+            for (j, x) in slice.iter().enumerate() {
+              // Now we iterate the sub slice, looking for the ascii-31, which we use to seperate source from msg
+              if x == &31 {
+                // Attempt to parse the source and message from bytes to utf-8
+                match (from_utf8(&slice[0..j]), from_utf8(&slice[j+1..slice.len()])) {
+                  (Ok(source), Ok(message)) => {
+                    messages.push(Message { server: "".to_string(), is_dm: true,  source: source.to_string(), content: message.to_string() } )
+                  },
+                  _ => return Err(Box::new(RablParseError::new("Failed to parse in poll_messages")))
+                }  
+              }
+            }
+          }
+
+          // Server Message
+          else if unit_count == 2 {
+            println!("SERVER MSSG RECEEEV");
+            let mut tokens: Vec<String> = Vec::new();
+
+            let mut inner_cursor = 0_usize;
+            for (j, x) in slice.iter().enumerate() {
+              if x == &31 {
+                let unit = &slice[inner_cursor..j];
+                tokens.push(from_utf8(&unit).unwrap().to_owned());
+
+                inner_cursor = j+1;
+              }
+
+              if j == slice.len()-1 {
+                let content = &slice[inner_cursor..=j];
+                tokens.push(from_utf8(&content).unwrap().to_owned());
+              }
+            }
+
+
+            println!("{:?}", tokens[0]);
+            println!("{:?}", tokens);
+            messages.push(Message {server: tokens[0].clone(), is_dm: false, source: tokens[1].clone(), content: tokens[2].clone()});
+          }
+
+          // Malformed response from server :O
+          else {}
+
 
           // Advance our cursor to the outer-loop index+1 (Moves us to the next source:msg block)
           cursor = i+1;
