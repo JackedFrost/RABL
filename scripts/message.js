@@ -107,7 +107,7 @@ function sendMessage() {
     }
     if(windowLocation == "Server"){
         try {
-            rabl_rust.send_message(username, server, messageInput);
+            rabl_rust.send_server_message(username, server, messageInput);
         } catch (send_message_error) {
             console.log(send_message_error)
         }
