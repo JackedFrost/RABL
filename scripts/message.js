@@ -3,14 +3,18 @@ var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
 const sqlite3 = require('sqlite3').verbose();
 var windowLocation = determineLocation();
-var sender = getLocationName();
-console.log(sender);
 
+if (windowLocation == "Server"){
+    var server = getLocationName();
+    createTableIfNotExists(server)
+    getSavedMessages(userImage, server);
+}
+else{
+    var friend = getSenderName();
+    createTableIfNotExists(friend)
+    getSavedMessages(userImage, friend);
+}
 
-
-//Looks for messages in the datbase if it exists, if not it will make the database
-createTableIfNotExists(sender)
-getSavedMessages(userImage, sender);
 getMessages();
 setInterval(function(){
     getMessages();
@@ -30,13 +34,14 @@ function determineLocation(){
 }
 function getLocationName(){
     let usp = new URLSearchParams(window.location.search);
-    var locationName;
-    if( windowLocation == "Server"){
-        locationName = usp.get('room')
-    }else{
-        locationName = usp.get('friend')
-    }
+    locationName = usp.get('room')
     return locationName
+}
+function getSenderName(){
+    let usp = new URLSearchParams(window.location.search);
+    sender = usp.get('friend')
+    return friend;
+    
 }
 
 //message Templating
@@ -102,11 +107,17 @@ function sendMessage() {
     }
     if(windowLocation == "Server"){
         try {
-            rabl_rust.send_message(username, sender, messageInput);
+            rabl_rust.send_message(username, server, messageInput);
         } catch (send_message_error) {
             console.log(send_message_error)
         }
+        var messageTime = getMessageTime();
+        var message = createMessage(messageInput, messageTime, userImage, username);
+        var messageSlot = document.createElement('li');
+        messageSlot.innerHTML = message;
+        messageList.appendChild(messageSlot);
         update();
+        saveMessage(messageInput, messageTime, username);
         return false;
 
     }else{
@@ -129,41 +140,39 @@ function sendMessage() {
 }
 
 function getMessages(){
-    if( windowLocation == "Server"){
-        var recievedMessages = rabl_rust.poll_messages(sender)
-        for(i = 0; i <recievedMessages.length; i++){
-            let content = recievedMessages[i].Content
-            let source = recievedMessages[i].Source
-            var messageTime = getMessageTime();
-            var userImage = "../placeholder/images/treti.png"
-            message = createMessage(content, messageTime, userImage, source);
-            var messageSlot = document.createElement('li');
-            messageSlot.innerHTML = message;
-            messageList.appendChild(messageSlot);
-            if (content != null || content != undefined ){
-            saveMessage(content, messageTime, source);
-            autoScroll();
-            }
-        }
-    }else{
         var recievedMessages = rabl_rust.poll_messages(username)
         for(i = 0; i <recievedMessages.length; i++){
-            let content = recievedMessages[i].Content
-            let source = recievedMessages[i].Source
-            var messageTime = getMessageTime();
-            var userImage = "../placeholder/images/treti.png"
-            message = createMessage(content, messageTime, userImage, source);
-            var messageSlot = document.createElement('li');
-            messageSlot.innerHTML = message;
-            messageList.appendChild(messageSlot);
-            if (content != null || content != undefined ){
-            saveMessage(content, messageTime, source);
-            autoScroll();
+            let serverName = recievedMessages[i].Server
+            if (serverName != null || serverName != undefined){
+                let content = recievedMessages[i].Content
+                let source = recievedMessages[i].Source
+                var messageTime = getMessageTime();
+                var userImage = "../placeholder/images/treti.png"
+                message = createMessage(content, messageTime, userImage, source);
+                var messageSlot = document.createElement('li');
+                messageSlot.innerHTML = message;
+                messageList.appendChild(messageSlot);
+                if (content != null || content != undefined ){
+                    saveMessage(content, messageTime, source);
+                    autoScroll();
+                }
+            }else{
+                let content = recievedMessages[i].Content
+                let source = recievedMessages[i].Source
+                var messageTime = getMessageTime();
+                var userImage = "../placeholder/images/treti.png"
+                message = createMessage(content, messageTime, userImage, source);
+                var messageSlot = document.createElement('li');
+                messageSlot.innerHTML = message;
+                messageList.appendChild(messageSlot);
+                if (content != null || content != undefined ){
+                    saveMessage(content, messageTime, source);
+                    autoScroll();    
+                }
             }
         }
-    }
-    
 }
+
 
 // Updating the GUI 
 function update() {
@@ -176,32 +185,48 @@ function autoScroll(){
 }
 
 // Database functions//
-function createTableIfNotExists(sender){
+function createTableIfNotExists(messageSource){
     let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
     chatLog.serialize(function(){
-        chatLog.run(`CREATE TABLE IF NOT EXISTS ${sender}_logs (messageID INT,username VARCHAR, message TEXT, messageTime VARCHAR)`);
+        chatLog.run(`CREATE TABLE IF NOT EXISTS ${messageSource}_logs (messageID INT,username VARCHAR, message TEXT, messageTime VARCHAR)`);
     })
 }
-function saveMessage(messageInput, messageTime,source){
+function saveMessage(messageInput, messageTime,messageSource){
     let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
-    chatLog.serialize(function(){
-        chatLog.run(`CREATE TABLE IF NOT EXISTS ${source}_logs (messageID INT,username VARCHAR, message TEXT, messageTime VARCHAR)`);
-    var Id = 1;
-    var messageID = Id++;
-    try{
-        var statement = chatLog.prepare(`INSERT INTO ${source}_logs VALUES (?,?,?,?)`);
-        statement.run(messageID, source, messageInput, messageTime);
-        statement.finalize();
-    }catch (error){
-        console.log(error)
-        alert("There was a problem storing the message, message will be deleted from chat window on refresh")
-    }   
-});
+    if (windowLocation == "Server"){
+        chatLog.serialize(function(){
+            chatLog.run(`CREATE TABLE IF NOT EXISTS ${server}_logs (messageID INT,username VARCHAR, message TEXT, messageTime VARCHAR)`);
+        var Id = 1;
+        var messageID = Id++;
+        try{
+            var statement = chatLog.prepare(`INSERT INTO ${server}_logs VALUES (?,?,?,?)`);
+            statement.run(messageID, messageSource, messageInput, messageTime);
+            statement.finalize();
+        }catch (error){
+            console.log(error)
+            alert("There was a problem storing the message, message will be deleted from chat window on refresh")
+        }   
+    });   
+    }else{
+        chatLog.serialize(function(){
+            chatLog.run(`CREATE TABLE IF NOT EXISTS ${messageSource}_logs (messageID INT,username VARCHAR, message TEXT, messageTime VARCHAR)`);
+        var Id = 1;
+        var messageID = Id++;
+        try{
+            var statement = chatLog.prepare(`INSERT INTO ${messageSource}_logs VALUES (?,?,?,?)`);
+            statement.run(messageID, messageSource, messageInput, messageTime);
+            statement.finalize();
+        }catch (error){
+            console.log(error)
+            alert("There was a problem storing the message, message will be deleted from chat window on refresh")
+        }   
+    });
+    }
 }
 
-function getSavedMessages(userImage,sender){
+function getSavedMessages(userImage,messageSource){
     let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
-    let query =(`SELECT * from ${sender}_logs`)
+    let query =(`SELECT * from ${messageSource}_logs`)
     chatLog.all(query, [], (err,rows) =>{
         if (err){
             console.log(err);
