@@ -35,7 +35,7 @@
   <div class="flex-1 flex flex-col min-h-screen h-screen">
     <div class="flex text-white h-12">
       <!--Room Name-->
-      <div class="bg-gray-800 w-56 flex-none flex items-center justify-between border-b border-gray-900 px-3 py-2">
+      <div class="bg-gray-800 w-56 flex-none flex items-center justify-between border-b border-gray-900 px-3 py-2" id ="serverName">
         <div> Rabl</div>
         <button>
           <svg fill="currentColor" viewBox="0 0 24 24" width="24" height="24">
@@ -216,6 +216,14 @@
                   id="messageInput" placeholder="Message..." name="messageInput">
               </div>
 
+              <!--Emoji-->
+              <button class="px-2 py-2 h-10 bg-gray-700 rounded-l text-gray-500 hover:text-white" id="emoji-button" >
+                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </button>
+
               <!--Gif Drawer-->
               <button
                 class="px-2 py-2 h-10 bg-gray-700 rounded-l text-gray-500 hover:text-white border-l border-gray-600">
@@ -224,13 +232,7 @@
                     d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </button>
-              <!--Emoji-->
-              <button class="px-2 py-2 h-10 bg-gray-700 rounded-l text-gray-500 hover:text-white">
-                <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </button>
+
             </div>
         </div>
       </div>
@@ -255,6 +257,7 @@
 </html>
 <script src= "../lib/index.js"></script>
 <script src = "../scripts/userInfo.js"></script>
+<script src= "../scripts/serverMessage.js"></script>
 <script src="../scripts/message.js"></script>
 <script src="../scripts/servers.js"></script>
 <script src="../scripts/logout.js"></script>

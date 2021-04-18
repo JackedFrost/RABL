@@ -15,3 +15,4 @@ function updateGUI(server){
   serverSlot.innerHTML = html;
   serversList.appendChild(serverSlot);
 }
+

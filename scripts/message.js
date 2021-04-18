@@ -146,26 +146,26 @@ function getMessages(){
             if (serverName != null || serverName != undefined){
                 let content = recievedMessages[i].Content
                 let source = recievedMessages[i].Source
-                var messageTime = getMessageTime();
-                var userImage = "../placeholder/images/treti.png"
-                message = createMessage(content, messageTime, userImage, source);
-                var messageSlot = document.createElement('li');
-                messageSlot.innerHTML = message;
-                messageList.appendChild(messageSlot);
                 if (content != null || content != undefined ){
+                    var messageTime = getMessageTime();
+                    var userImage = "../placeholder/images/treti.png"
+                    message = createMessage(content, messageTime, userImage, source);
+                    var messageSlot = document.createElement('li');
+                    messageSlot.innerHTML = message;
+                    messageList.appendChild(messageSlot);
                     saveMessage(content, messageTime, source);
                     autoScroll();
                 }
             }else{
                 let content = recievedMessages[i].Content
                 let source = recievedMessages[i].Source
-                var messageTime = getMessageTime();
-                var userImage = "../placeholder/images/treti.png"
-                message = createMessage(content, messageTime, userImage, source);
-                var messageSlot = document.createElement('li');
-                messageSlot.innerHTML = message;
-                messageList.appendChild(messageSlot);
                 if (content != null || content != undefined ){
+                    var messageTime = getMessageTime();
+                    var userImage = "../placeholder/images/treti.png"
+                    message = createMessage(content, messageTime, userImage, source);
+                    var messageSlot = document.createElement('li');
+                    messageSlot.innerHTML = message;
+                    messageList.appendChild(messageSlot);
                     saveMessage(content, messageTime, source);
                     autoScroll();    
                 }

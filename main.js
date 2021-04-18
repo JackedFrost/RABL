@@ -8,13 +8,14 @@ function createWindow () {
     height: 1080,
     webPreferences: {
       nodeIntegration: true,
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      contextIsolation: false,
     },
     frame: true, transparent: true, alwaysOnTop: false, backgroundColor:'#1F2937'
   })
   var menu= null
   Menu.setApplicationMenu(menu)
-  //win.setResizable(true)
+  win.setResizable(true)
 
   win.loadFile('Views/login.html')
   win.openDevTools()
