@@ -127,7 +127,7 @@ function sendMessage() {
         }
         
         var messageTime = getMessageTime();
-        var message = createMessage(messageInput, messageTime, userImage, username);
+        var message = createMessage(messageInput, messageTime, username, username);
         var messageSlot = document.createElement('li');
         messageSlot.innerHTML = message;
         messageList.appendChild(messageSlot);
@@ -223,7 +223,7 @@ function saveMessage(messageInput, messageTime,messageSource){
     }
 }
 
-function getSavedMessages(userImage,messageSource){
+function getSavedMessages(messageSource){
     let chatLog = new sqlite3.Database("./logs.db", sqlite3.OPEN_READWRITE| sqlite3.OPEN_CREATE);
     let query =(`SELECT * from ${messageSource}_logs`)
     chatLog.all(query, [], (err,rows) =>{
@@ -232,7 +232,7 @@ function getSavedMessages(userImage,messageSource){
             return;
         }
         rows.forEach((row) => {
-        var message = createMessage(row.message,row.messageTime, userImage, row.username);
+        var message = createMessage(row.message,row.messageTime, row.username, row.username);
         var messageSlot = document.createElement('li');
         messageSlot.innerHTML = message;
         messageList.appendChild(messageSlot);
