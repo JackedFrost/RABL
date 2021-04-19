@@ -2,6 +2,7 @@
   "name": "RABL",
   "description": "",
   "main": "main.js",
+  "homepage": "./",
   "scripts": {
     "start": "electron .",
     "build-css": "tailwindcss build assets/src/styles.css -o assets/css/styles.css",
