@@ -1,4 +1,3 @@
-var userImage = "../placeholder/images/treti.png";
 var messageList = document.getElementById("messageList");
 var chatWindow = document.getElementById("chatWindow");
 const sqlite3 = require('sqlite3').verbose();
@@ -7,12 +6,12 @@ var windowLocation = determineLocation();
 if (windowLocation == "Server"){
     var server = getLocationName();
     createTableIfNotExists(server)
-    getSavedMessages(userImage, server);
+    getSavedMessages(server);
 }
 else{
     var friend = getSenderName();
     createTableIfNotExists(friend)
-    getSavedMessages(userImage, friend);
+    getSavedMessages(friend);
 }
 
 getMessages();
@@ -45,10 +44,10 @@ function getSenderName(){
 }
 
 //message Templating
-function createMessage(messageInput, messageTime, userImage, sentBy) {
+function createMessage(messageInput, messageTime, Image, sentBy) {
     console.log(sentBy);
     var html= `<div class="flex mx-5 my-3 py-4 border-5 border-gray-700"><div class="flex-none">
-            <a href="#"><img src=" ${userImage}"alt=" ${sentBy}_img" class="w-10 h-10 rounded-xl"></img></a>
+            <a href="#"><img src=" ../placeholder/images/${Image}.jpg"alt=" ${sentBy}_img" class="w-10 h-10 rounded-xl"></img></a>
             </div><div class="ml-5"><div>
             <a href="#" class="text-white hover:underline">${sentBy}</a>
             <span class="text-xs text-gray-600 ml-1">${messageTime} </span></div>
@@ -112,7 +111,7 @@ function sendMessage() {
             console.log(send_message_error)
         }
         var messageTime = getMessageTime();
-        var message = createMessage(messageInput, messageTime, userImage, username);
+        var message = createMessage(messageInput, messageTime, username, username);
         var messageSlot = document.createElement('li');
         messageSlot.innerHTML = message;
         messageList.appendChild(messageSlot);
@@ -148,7 +147,7 @@ function getMessages(){
                 let source = recievedMessages[i].Source
                 if (content != null || content != undefined ){
                     var messageTime = getMessageTime();
-                    var userImage = "../placeholder/images/treti.png"
+                    var userImage = source;
                     message = createMessage(content, messageTime, userImage, source);
                     var messageSlot = document.createElement('li');
                     messageSlot.innerHTML = message;
@@ -161,7 +160,7 @@ function getMessages(){
                 let source = recievedMessages[i].Source
                 if (content != null || content != undefined ){
                     var messageTime = getMessageTime();
-                    var userImage = "../placeholder/images/treti.png"
+                    var userImage = source;
                     message = createMessage(content, messageTime, userImage, source);
                     var messageSlot = document.createElement('li');
                     messageSlot.innerHTML = message;
