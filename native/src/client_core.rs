@@ -244,8 +244,6 @@ pub fn poll_messages(username: String) -> Result<Option<Vec<Message>>, Box<dyn E
   let mut buffer = [0 as u8; 32_768];
   stream.read(&mut buffer)?;
 
-  println!("{:?}", &buffer[0..30]);
-
   // Now we need to take that buffer and make an vec of messages, assuming the server did not respond with nil
   // First, check to see if buffer contains 'nil', if so simply return None
   // Otherwise, we build the vec from the buffer contents
@@ -277,7 +275,6 @@ pub fn poll_messages(username: String) -> Result<Option<Vec<Message>>, Box<dyn E
 
           // DM
           if unit_count == 1 {
-            println!("DM!!!");
             for (j, x) in slice.iter().enumerate() {
               // Now we iterate the sub slice, looking for the ascii-31, which we use to seperate source from msg
               if x == &31 {
@@ -294,7 +291,6 @@ pub fn poll_messages(username: String) -> Result<Option<Vec<Message>>, Box<dyn E
 
           // Server Message
           else if unit_count == 2 {
-            println!("SERVER MSSG RECEEEV");
             let mut tokens: Vec<String> = Vec::new();
 
             let mut inner_cursor = 0_usize;
@@ -311,10 +307,6 @@ pub fn poll_messages(username: String) -> Result<Option<Vec<Message>>, Box<dyn E
                 tokens.push(from_utf8(&content).unwrap().to_owned());
               }
             }
-
-
-            println!("{:?}", tokens[0]);
-            println!("{:?}", tokens);
             messages.push(Message {server: tokens[0].clone(), is_dm: false, source: tokens[1].clone(), content: tokens[2].clone()});
           }
 
